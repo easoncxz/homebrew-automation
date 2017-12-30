@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.author = 'easoncxz'
   s.email = 'me@easoncxz.com'
   s.homepage = 'https://github.com/easoncxz/homebrew-automation'
-  s.license = 'GPL-v3.0'
+  s.license = 'GPL-3.0'
   s.executables += [
     'homebrew_automation.rb'
   ]
