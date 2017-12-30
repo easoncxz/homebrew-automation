@@ -3,6 +3,7 @@ PATH
   specs:
     homebrew_automation (0.0.1)
       parser (~> 2.4)
+      thor (~> 0.20)
       unparser (~> 0.2)
 
 GEM
@@ -38,6 +39,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
     rspec-support (3.7.0)
+    thor (0.20.0)
     thread_safe (0.3.6)
     unparser (0.2.6)
       abstract_type (~> 0.0.7)

@@ -11,10 +11,10 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/easoncxz/homebrew-automation'
   s.license = 'GPL-v3.0'
   s.executables += [
-    'update_formula_bottle.rb',
-    'update_formula_sdist.rb'
+    'homebrew_automation.rb'
   ]
 
+  s.add_runtime_dependency 'thor', '~> 0.20'
   s.add_runtime_dependency 'parser', '~> 2.4'
   s.add_runtime_dependency 'unparser', '~> 0.2'
 end
