@@ -28,11 +28,20 @@ class HackAssembler < Formula
 end
   HEREDOC
 
+  def parsing_api str
+    HomebrewAutomation::Formula.parse_string str
+  end
+
+  def formatting_api formula
+    formula.to_s
+  end
+
   it 'can modify the (source tarball) URL and sha256 fields of a Formula' do
-    formula_before = Parser::CurrentRuby.parse INIT_FORMULA
-    formula_after = HomebrewAutomation.update_formula_field("url", "https://google.com", formula_before)
-    formula_after = HomebrewAutomation.update_formula_field("sha256", "abcd", formula_after)
-    expect(Unparser.unparse formula_after).to eq <<-HEREDOC
+    formula_before = parsing_api INIT_FORMULA
+    formula_after = formula_before.
+      update_field("url", "https://google.com").
+      update_field("sha256", "abcd")
+    expect(formatting_api(formula_after)).to eq <<-HEREDOC.chomp
 class HackAssembler < Formula
   desc("A toy assembler for the Hack machine language")
   homepage("https://github.com/easoncxz/hack-assembler")
@@ -53,13 +62,12 @@ class HackAssembler < Formula
   end
 end
       HEREDOC
-      .chomp
   end
 
   it 'can put new bottles definitions into a formula' do
-    formula_before = Parser::CurrentRuby.parse INIT_FORMULA
-    formula_after = HomebrewAutomation.put_bottle("el_capitan", "abcd", formula_before)
-    expect(Unparser.unparse(formula_after)).to eq <<-HEREDOC
+    formula_before = parsing_api INIT_FORMULA
+    formula_after = formula_before.put_bottle("el_capitan", "abcd")
+    expect(formatting_api formula_after).to eq <<-HEREDOC.chomp
 class HackAssembler < Formula
   desc("A toy assembler for the Hack machine language")
   homepage("https://github.com/easoncxz/hack-assembler")
@@ -81,13 +89,12 @@ class HackAssembler < Formula
   end
 end
     HEREDOC
-      .chomp
   end
 
   it 'can overwrite existing bottle definitions' do
-    formula_before = Parser::CurrentRuby.parse INIT_FORMULA
-    formula_after = HomebrewAutomation.put_bottle("yosemite", "abcd", formula_before)
-    expect(Unparser.unparse(formula_after)).to eq <<-HEREDOC
+    formula_before = parsing_api INIT_FORMULA
+    formula_after = formula_before.put_bottle("yosemite", "abcd")
+    expect(formatting_api(formula_after)).to eq <<-HEREDOC.chomp
 class HackAssembler < Formula
   desc("A toy assembler for the Hack machine language")
   homepage("https://github.com/easoncxz/hack-assembler")
@@ -108,7 +115,6 @@ class HackAssembler < Formula
   end
 end
     HEREDOC
-      .chomp
   end
 
 end

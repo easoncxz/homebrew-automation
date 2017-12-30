@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     homebrew_automation (0.0.1)
-      parser
-      unparser
+      parser (~> 2.4)
+      unparser (~> 0.2)
 
 GEM
   remote: https://rubygems.org/
