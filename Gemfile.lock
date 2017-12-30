@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    homebrew_automation (0.0.3)
+    homebrew_automation (0.0.4)
       parser (~> 2.4)
       thor (~> 0.20)
       unparser (~> 0.2)
@@ -55,8 +55,8 @@ PLATFORMS
 
 DEPENDENCIES
   homebrew_automation!
-  rake
-  rspec
+  rake (~> 12.3)
+  rspec (~> 3.7)
 
 BUNDLED WITH
    1.16.1
