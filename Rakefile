@@ -29,7 +29,7 @@ begin
 
   desc 'Publish Gem to Rubygems'
   task :publish => [ :build ] do
-    cred_file = '~/.gem/credential'
+    cred_file = "#{ENV['HOME']}/.gem/credential"
     File.write(
       cred_file, [
         '---',
