@@ -6,10 +6,12 @@ sudo: false
 cache:
     directories:
         - $HOME/.rbenv/
+        - $HOME/.rvm/
 
 before_install:
     - which ruby
     - git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+    - export PATH="$HOME/.rbenv/bin:$PATH"
     - eval "$(rbenv init -)"
     - rbenv local
     - which ruby
