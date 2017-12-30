@@ -16,11 +16,28 @@ begin
     system 'gem build homebrew_automation.gemspec'
   end
 
+  # The output of the :build task
+  def gemfile_path
+    "homebrew_automation-#{HomebrewAutomation::VERSION}.gem"
+  end
+
   desc 'Install Gem'
   task :install => [ :build ] do
-    gem = "homebrew_automation-#{HomebrewAutomation::VERSION}.gem"
-    puts "Installing Gem at: #{gem}"
-    system "gem install #{gem}"
+    puts "Installing Gem at: #{gemfile_path}"
+    system "gem install #{gemfile_path}"
+  end
+
+  desc 'Publish Gem to Rubygems'
+  task :publish => [ :build ] do
+    cred_file = '~/.gem/credential'
+    File.write(
+      cred_file, [
+        '---',
+        ":rubygems_api_key: #{ENV['RUBYGEMS_API_KEY']}",
+        ""
+      ].join("\n"))
+    File.chmod(0600, cred_file)
+    system "gem push #{gemfile_path}"
   end
 
 rescue LoadError

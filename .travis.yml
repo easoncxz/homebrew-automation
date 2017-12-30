@@ -10,3 +10,9 @@ install:
 
 script:
     - rake
+
+deploy:
+    provider: rubygems
+    api_key: "$RUBYGEMS_API_KEY"
+    on:
+        tags: true
