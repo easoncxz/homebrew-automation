@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    homebrew_automation (0.0.1)
+    homebrew_automation (0.0.2)
       parser (~> 2.4)
       thor (~> 0.20)
       unparser (~> 0.2)

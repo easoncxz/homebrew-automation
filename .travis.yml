@@ -12,7 +12,9 @@ script:
     - rake
 
 deploy:
-    provider: script
-    script: rake publish
+    provider: rubygems
+    api_key: "$RUBYGEMS_API_KEY"
+    gem: homebrew_automation
+    gemspec: homebrew_automation.gemspec
     on:
         tags: true
