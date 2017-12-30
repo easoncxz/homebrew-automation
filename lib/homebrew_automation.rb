@@ -26,6 +26,7 @@ module HomebrewAutomation
 
     # Take an post-parsing abstract syntax tree representation of a Homebrew Formula.
     # This is mostly not intended for common use-cases.
+    #
     # @param ast [Parser::AST::Node]
     def initialize ast
       @ast = ast
@@ -38,6 +39,7 @@ module HomebrewAutomation
     def to_s Unparser.unparse @ast end
 
     # Update a field in the Formula
+    #
     # @param field [String] Name of the Formula field, e.g. `url`
     # @param value [String] Value of the Formula field, e.g. `https://github.com/easoncxz/homebrew-automation`
     # @return [Formula] a new instance of Formula with the changes applied
@@ -53,6 +55,7 @@ module HomebrewAutomation
     end
 
     # Insert or replace the Homebrew Bottle for a given OS
+    #
     # @param os [String] Operating system name, e.g. "yosemite", as per Homebrew's conventions
     # @param sha256 [String] Checksum of the binary "Bottle" tarball
     # @return [Formula] a new instance of Formula with the changes applied
