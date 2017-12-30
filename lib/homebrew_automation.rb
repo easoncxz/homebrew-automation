@@ -5,25 +5,42 @@ require 'unparser'
 Parser::Builders::Default.emit_lambda = true
 Parser::Builders::Default.emit_procarg0 = true
 
+# Helps you manipulate Homebrew Formula files, Bottles etc.
 module HomebrewAutomation
 
+  # An internal representation of some Formula.rb Ruby source file, containing
+  # the definition of a Homebrew Bottle. See Homebrew docs for concepts:
+  # https://docs.brew.sh/Bottles.html
+  #
+  # Instance methods produce new instances where applicable, leaving all
+  # instances free from mutation.
   class Formula
 
-    # Formula::parse_string :: String -> Formula
+    # A constructor method that parses the string form of a Homebrew Formula
+    # source file into an internal representation
+    #
+    # @return [Formula]
     def self.parse_string s
       Formula.new (Parser::CurrentRuby.parse s)
     end
 
-    # Formula::new :: Parser::AST::Node -> Formula
+    # Take an post-parsing abstract syntax tree representation of a Homebrew Formula.
+    # This is mostly not intended for common use-cases.
+    # @param ast [Parser::AST::Node]
     def initialize ast
       @ast = ast
     end
 
-    def to_s
-      Unparser.unparse @ast
-    end
+    # Produce Homebrew Formula source code as a string, suitable for saving as
+    # a Ruby source file.
+    #
+    # @return [String]
+    def to_s Unparser.unparse @ast end
 
-    # update_field :: String -> String -> Formula
+    # Update a field in the Formula
+    # @param field [String] Name of the Formula field, e.g. `url`
+    # @param value [String] Value of the Formula field, e.g. `https://github.com/easoncxz/homebrew-automation`
+    # @return [Formula] a new instance of Formula with the changes applied
     def update_field field, value
       Formula.new update(
         @ast,
@@ -35,8 +52,10 @@ module HomebrewAutomation
         -> (n) { n.updated(nil, [value]) })
     end
 
-    # Insert or replace the bottle for a given OS
-    # put_bottle :: String -> String -> Node -> Node
+    # Insert or replace the Homebrew Bottle for a given OS
+    # @param os [String] Operating system name, e.g. "yosemite", as per Homebrew's conventions
+    # @param sha256 [String] Checksum of the binary "Bottle" tarball
+    # @return [Formula] a new instance of Formula with the changes applied
     def put_bottle os, sha256
       Formula.new update(
         @ast,
