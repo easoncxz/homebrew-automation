@@ -5,7 +5,7 @@ require 'unparser'
 require 'homebrew_automation'
 
 
-describe 'surface API of manipulate_formulae' do
+describe 'The Formula class' do
   INIT_FORMULA = <<-HEREDOC
 class HackAssembler < Formula
   desc("A toy assembler for the Hack machine language")
@@ -115,6 +115,22 @@ class HackAssembler < Formula
   end
 end
     HEREDOC
+  end
+
+  it "defines #== equality by equivalence of source trees" do
+    formula_before = parsing_api INIT_FORMULA
+    formula_before_2 = parsing_api INIT_FORMULA
+    expect(formula_before).not_to be formula_before_2
+    expect(formula_before).to eq formula_before_2
+  end
+
+  it "doesn't mutate instances by use of its methods" do
+    before = parsing_api INIT_FORMULA
+    before_2 = parsing_api INIT_FORMULA
+    after = before.update_field "sha256", "1234"
+    expect(after).not_to be before
+    expect(after).not_to eq before
+    expect(after).not_to eq before_2
   end
 
 end

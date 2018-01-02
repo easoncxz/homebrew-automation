@@ -67,6 +67,15 @@ module HomebrewAutomation
         put_bottle_version(os, sha256))
     end
 
+    def == o
+      self.class == o.class && self.ast == o.ast
+    end
+
+    alias :eql? :==
+
+    protected
+    attr_reader :ast
+
     private
 
     # Path to the :begin node
