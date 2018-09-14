@@ -68,7 +68,11 @@ module HomebrewAutomation
     end
 
     def == o
-      self.class == o.class && self.ast == o.ast
+      self.class == o.class && @ast == o.ast
+    end
+
+    def hash
+      @ast.hash
     end
 
     alias :eql? :==
@@ -97,7 +101,7 @@ module HomebrewAutomation
     def put_bottle_version os, sha256
       -> (bot_begin) {
         bot_begin.updated(
-          nil,  # keep the node type the unchanged
+          nil,  # keep the node type unchanged
           bot_begin.children.reject(
             # Get rid of any existing matching ones
             &by_both(
