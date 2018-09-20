@@ -10,16 +10,19 @@ task :build => [ :test ] do
 end
 
 desc 'Run all tests'
-task :test => :rspec
+task :test => [:rspec]
+
+task :test_deps do
+  if not system 'which http-echo-server'
+    system 'npm -g install http-echo-server'
+  end
+end
 
 begin
   # https://relishapp.com/rspec/rspec-core/docs/command-line/rake-task
   require 'rspec/core/rake_task'
   RSpec::Core::RakeTask.new(:rspec)
+  task :rspec => :test_deps
 rescue LoadError
-end
-
-def gem_path
-  "homebrew_automation-#{HomebrewAutomation::VERSION}.gem"
 end
 
