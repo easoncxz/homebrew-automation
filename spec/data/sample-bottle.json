@@ -1,0 +1,25 @@
+{
+  "easoncxz/local-tap/hack-assembler": {
+    "formula": {
+      "pkg_version": "0.1.1.17",
+      "path": "Library/Taps/easoncxz/homebrew-local-tap/Formula/hack-assembler.rb"
+    },
+    "bottle": {
+      "root_url": "https://homebrew.bintray.com/bottles-local-tap",
+      "prefix": "/usr/local",
+      "cellar": "any_skip_relocation",
+      "rebuild": 0,
+      "tags": {
+        "high_sierra": {
+          "filename": "hack-assembler-0.1.1.17.high_sierra.bottle.tar.gz",
+          "local_filename": "hack-assembler--0.1.1.17.high_sierra.bottle.tar.gz",
+          "sha256": "1a0c84bf9bae24fec09ed904ba4595eb5cf4d064034128f845db9c3e2711f087"
+        }
+      }
+    },
+    "bintray": {
+      "package": "hack-assembler",
+      "repository": "bottles-local-tap"
+    }
+  }
+}
