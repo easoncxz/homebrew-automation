@@ -55,6 +55,15 @@ module HomebrewAutomation
         -> (n) { n.updated(nil, [value]) })
     end
 
+    # Update two fields together
+    #
+    # @param url [String] URL of source tarball
+    # @param sha256 [String] SHA256 sum of source tarball
+    def put_sdist url, sha256
+      update_field("url", url).
+      update_field("sha256", sha256)
+    end
+
     # Insert or replace the Homebrew Bottle for a given OS
     #
     # @param os [String] Operating system name, e.g. "yosemite", as per Homebrew's conventions

@@ -11,9 +11,7 @@ class MyCliApp < Thor
   option :sha256, :required => true
   def put_sdist
     before = HomebrewAutomation::Formula.parse_string($stdin.read)
-    after = before.
-      update_field("url", options[:url]).
-      update_field("sha256", options[:sha256])
+    after = before.put_sdist options[:url], options[:sha256]
     $stdout.write after
   end
 

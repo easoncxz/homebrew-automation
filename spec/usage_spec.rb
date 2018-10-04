@@ -38,9 +38,7 @@ end
 
   it 'can modify the (source tarball) URL and sha256 fields of a Formula' do
     formula_before = parsing_api INIT_FORMULA
-    formula_after = formula_before.
-      update_field("url", "https://google.com").
-      update_field("sha256", "abcd")
+    formula_after = formula_before.put_sdist("https://google.com", "abcd")
     expect(formatting_api(formula_after)).to eq <<-HEREDOC.chomp
 class HackAssembler < Formula
   desc("A toy assembler for the Hack machine language")
