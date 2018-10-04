@@ -18,12 +18,12 @@ module HomebrewAutomation
       @content = content
     end
 
-    attr_reader :filename, :minus_minus
+    attr_reader :filename, :minus_minus, :content
 
     # Takes ages to run, just like if done manually
     def build
-      system 'brew', 'tap', local_tap_name, @tap_url
-      system 'brew', 'install', '--verbose', '--build-bottle', @formula_name
+      die unless system 'brew', 'tap', local_tap_name, @tap_url
+      die unless system 'brew', 'install', '--verbose', '--build-bottle', @formula_name
     end
 
     # Read and analyse metadata
@@ -42,8 +42,13 @@ module HomebrewAutomation
 
     private
 
+    # A name for the temporary tap; doesn't really matter what this is.
     def local_tap_name
       'easoncxz/local-tap'
+    end
+
+    def die
+      raise StandardError.new
     end
 
   end

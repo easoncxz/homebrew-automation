@@ -13,6 +13,8 @@ module HomebrewAutomation
       @tag = tag
     end
 
+    attr_reader :user, :repo, :tag
+
     # Calculate and return the file's checksum. Lazy and memoized.
     #
     # @return [String] hex-encoded string representation of the checksum

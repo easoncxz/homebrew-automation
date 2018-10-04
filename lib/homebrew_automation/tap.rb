@@ -11,6 +11,8 @@ module HomebrewAutomation
       @url = "https://#{token}@github.com/#{user}/#{repo}.git"
     end
 
+    attr_reader :user, :repo, :token
+
     # Block (() -> nil) -> nil
     #
     # Do something in a fresh clone, then clean-up.
@@ -43,11 +45,11 @@ module HomebrewAutomation
     end
 
     def git_commit_am(msg)
-      system "git", "commit", "-am", msg
+      die unless system "git", "commit", "-am", msg
     end
 
     def git_push
-      system "git", "push"
+      die unless system "git", "push"
     end
 
 
@@ -55,11 +57,15 @@ module HomebrewAutomation
 
 
     def git_clone
-      system "git", "clone", @url
+      die unless system "git", "clone", @url
     end
 
     def remove_git_submodule
-      system "rm", "-rf", @repo
+      die unless system "rm", "-rf", @repo
+    end
+
+    def die
+      raise StandardError.new
     end
 
   end
