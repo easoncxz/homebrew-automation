@@ -11,3 +11,4 @@
 # YARD docs
 .yardoc/
 doc/
+Gemfile.lock
