@@ -2,7 +2,7 @@
 
 require 'thor'
 
-require 'homebrew_automation'
+require_relative '../lib/homebrew_automation.rb'
 
 class MyCliApp < Thor
 
