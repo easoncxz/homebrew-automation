@@ -57,7 +57,9 @@ module HomebrewAutomation
       safe_repo = URI.escape(repo_name)
       safe_pkg = URI.escape(package_name)
       safe_ver = URI.escape(version_name)
-      @http.get(rel("/packages/#{safe_username}/#{safe_repo}/#{safe_pkg}/#{safe_ver}/files"))
+      @http.get(
+        rel("/packages/#{safe_username}/#{safe_repo}/#{safe_pkg}/versions/#{safe_ver}/files"),
+        auth_headers)
     end
 
     def safe_username
