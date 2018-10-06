@@ -52,7 +52,13 @@ module HomebrewAutomation
       )
     end
 
-    private
+    # GET /packages/:subject/:repo/:package/versions/:version/files[?include_unpublished=0/1]
+    def get_all_files_in_version(repo_name, package_name, version_name)
+      safe_repo = URI.escape(repo_name)
+      safe_pkg = URI.escape(package_name)
+      safe_ver = URI.escape(version_name)
+      @http.get(rel("/packages/#{safe_username}/#{safe_repo}/#{safe_pkg}/#{safe_ver}/files"))
+    end
 
     def safe_username
       URI.escape(@username)

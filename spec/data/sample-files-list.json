@@ -1,0 +1,14 @@
+[
+    {
+        "created": "2018-10-06T04:50:15.140Z",
+        "name": "hack-assembler-0.1.1.17.high_sierra.bottle.tar.gz",
+        "owner": "easoncxz",
+        "package": "hack-assembler",
+        "path": "hack-assembler-0.1.1.17.high_sierra.bottle.tar.gz",
+        "repo": "homebrew-bottles",
+        "sha1": "64a013680c9fc007252e4da15f7e9f446dff12cb",
+        "sha256": "d985f1ec04a7a2c1cbf493362045f436e626e82e3e00b63e279504089c0ac2fd",
+        "size": 1100979,
+        "version": "0.1.1.17"
+    }
+]
