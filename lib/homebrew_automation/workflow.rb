@@ -32,7 +32,6 @@ module HomebrewAutomation
         bottle = Bottle.new(local_tap_url, formula_name, os_name)
         bottle.build
 
-        bottle.load_from_disk
         @bintray.create_version(
           @bintray_bottle_repo,
           formula_name,

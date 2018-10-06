@@ -18,26 +18,44 @@ module HomebrewAutomation
       @content = content
     end
 
-    attr_reader :filename, :minus_minus, :content
-
     # Takes ages to run, just like if done manually
     def build
       die unless system 'brew', 'tap', local_tap_name, @tap_url
       die unless system 'brew', 'install', '--verbose', '--build-bottle', @formula_name
+      die unless system 'brew', 'bottle', '--verbose', '--json', @formula_name
     end
 
-    # Read and analyse metadata
-    def find_bottle_filename
-      json = JSON.parse(File.read(Dir['*.json'][0]))
-      focus = json[json.keys.first]['bottle']['tags'][@os_name]
-      @minus_minus = focus['local_filename']
-      @filename = focus['filename']
+    # Read and analyse metadata JSON file
+    def locate_tarball
+      json_filename = Dir['*.json'].first
+      unless json_filename
+        build
+        return locate_tarball
+      end
+      json = JSON.parse(File.read(json_filename))
+      focus = json || die
+      focus = focus[json.keys.first] || die
+      focus = focus['bottle'] || die
+      focus = focus['tags'] || die
+      focus = focus[@os_name] || die
+      @minus_minus, @filename = focus['local_filename'], focus['filename']
     end
 
-    # Load data-proper
-    def load_from_disk
-      File.rename @minus_minus, @filename
-      @content = File.read @filename
+    def minus_minus
+      @minus_minus || locate_tarball.first
+    end
+
+    def filename
+      @filename || locate_tarball.last
+    end
+
+    def load_tarball_from_disk
+      File.rename minus_minus, filename
+      @content = File.read filename
+    end
+
+    def content
+      @content || load_tarball_from_disk
     end
 
     private

@@ -14,7 +14,7 @@ describe "HomebrewAutomation::Bottle" do
       "high_sierra"   # should match `spec/data/sample-bottle.json`
     )
     Dir.chdir 'spec/data' do
-      bottle.find_bottle_filename
+      bottle.locate_tarball
       expect(bottle.filename).to eq(bottle_filename)
       expect(bottle.minus_minus).to eq(bottle_minus_minus)
     end

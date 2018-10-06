@@ -6,9 +6,12 @@ module HomebrewAutomation
   class Tap
 
     # Get a token from: https://github.com/settings/tokens
-    def initialize(user, repo, token)
+    #
+    # @param keep_submodule [Boolean] When done, don't delete the tap Git repo
+    def initialize(user, repo, token, keep_submodule: false)
       @repo = repo
       @url = "https://#{token}@github.com/#{user}/#{repo}.git"
+      @keep_submodule = keep_submodule
     end
 
     attr_reader :user, :repo, :token
@@ -21,7 +24,7 @@ module HomebrewAutomation
         git_clone
         Dir.chdir @repo, &block
       ensure
-        remove_git_submodule
+        remove_git_submodule unless @keep_submodule
       end
     end
 
