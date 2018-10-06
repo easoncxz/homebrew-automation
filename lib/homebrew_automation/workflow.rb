@@ -18,9 +18,10 @@ module HomebrewAutomation
     end
 
     # @param source_dist [HomebrewAutomation::SourceDist]
-    def build_and_upload_bottle(source_dist)
+    # @param version_name [String] Bintray package "Version" name; defaults to stripping leading `v` from the Git tag.
+    def build_and_upload_bottle(source_dist, version_name: nil)
       formula_name = source_dist.repo
-      version_name = source_dist.tag.sub(/^v/, '')
+      version_name ||= source_dist.tag.sub(/^v/, '')
       os_name = MacOS.identify_version
       @tap.with_git_clone do
         @tap.on_formula(formula_name) do |formula|
