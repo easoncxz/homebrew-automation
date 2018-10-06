@@ -16,7 +16,7 @@ module HomebrewAutomation
 
     attr_reader :user, :repo, :token
 
-    # Block (() -> nil) -> nil
+    # forall a. Block (() -> a) -> a
     #
     # Do something in a fresh clone, then clean-up.
     def with_git_clone(&block)

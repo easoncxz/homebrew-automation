@@ -43,6 +43,8 @@ module HomebrewAutomation
           version_name,
           bottle.filename,
           bottle.content)
+
+        bottle
       end
     end
 
