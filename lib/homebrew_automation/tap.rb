@@ -47,6 +47,15 @@ module HomebrewAutomation
       end
     end
 
+    def git_config
+      name = ENV['TRAVIS_GIT_USER_NAME']
+      email = ENV['TRAVIS_GIT_USER_EMAIL']
+      if name && email
+        system 'git', 'config', '--global', 'user.name', name
+        system 'git', 'config', '--global', 'user.email', email
+      end
+    end
+
     def git_commit_am(msg)
       die unless system "git", "commit", "-am", msg
     end
