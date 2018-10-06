@@ -27,7 +27,7 @@ module HomebrewAutomation
 
     # Read and analyse metadata JSON file
     def locate_tarball
-      json_filename = Dir['*.json'].first
+      json_filename = Dir['*.bottle.json'].first
       unless json_filename
         build
         return locate_tarball
