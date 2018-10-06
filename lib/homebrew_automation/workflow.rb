@@ -1,30 +1,30 @@
 
+require_relative './mac-os.rb'
+
 module HomebrewAutomation
 
   # Imperative glue code
   class Workflow
 
-    # @param source_dist [HomebrewAutomation::SourceDist]
     # @param tap [HomebrewAutomation::Tap]
     # @param bintray [HomebrewAutomation::Bintray]
     def initialize(
-        source_dist,
         tap,
         bintray,
         bintray_bottle_repo: 'homebrew-bottles')
-      @source_dist = source_dist
       @tap = tap
       @bintray = bintray
       @bintray_bottle_repo = bintray_bottle_repo
     end
 
-    # @param formula_name [String]
-    # @param version_name [String]
-    # @param os_name [String] As recognised by Homebrew Formula/Bottle DSL
-    def build_and_upload_bottle(formula_name, version_name, os_name)
+    # @param source_dist [HomebrewAutomation::SourceDist]
+    def build_and_upload_bottle(source_dist)
+      formula_name = source_dist.repo
+      version_name = source_dist.tag.sub(/^v/, '')
+      os_name = MacOS.identify_version
       @tap.with_git_clone do
         @tap.on_formula(formula_name) do |formula|
-          formula.put_sdist(@source_dist.url, @source_dist.sha256)
+          formula.put_sdist(source_dist.url, source_dist.sha256)
         end
         @tap.git_commit_am "Throwaway commit; just for building bottles"
 
