@@ -15,10 +15,7 @@ Gem::Specification.new do |s|
   s.license = 'GPL-3.0'
 
   s.version = HomebrewAutomation::VERSION
-  s.files = [
-    'lib/homebrew_automation.rb',
-    'lib/homebrew_automation/version.rb'
-  ]
+  s.files = Dir['lib/**/*.rb']
   s.executables += [
     'homebrew_automation.rb'
   ]
