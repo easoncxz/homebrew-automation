@@ -5,6 +5,8 @@ require_relative './bottle_gatherer.rb'
 module HomebrewAutomation
 
   # Imperative glue code
+  #
+  # Probably each method suits to become a CLI command.
   class Workflow
 
     # @param tap [HomebrewAutomation::Tap]
@@ -21,10 +23,11 @@ module HomebrewAutomation
     # Build a bottle from the given source tarball reference
     #
     # @param source_dist [HomebrewAutomation::SourceDist] Source tarball
+    # @param formula_name [String] Formula name as appears in the Tap, which should be the same as the Bintray "Package" name
     # @param version_name [String] Bintray package "Version" name; defaults to stripping leading `v` from the Git tag.
     # @return [Bottle]
-    def build_and_upload_bottle(source_dist, version_name: nil)
-      formula_name = source_dist.repo
+    def build_and_upload_bottle(source_dist, formula_name: nil, version_name: nil)
+      formula_name ||= source_dist.repo
       version_name ||= source_dist.tag.sub(/^v/, '')
       os_name = MacOS.identify_version
       @tap.with_git_clone do
