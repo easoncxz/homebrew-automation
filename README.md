@@ -41,10 +41,11 @@ benefit from this Gem, you'll first have to manually:
 
 To use either the Gem as a library or as a CLI, install it via Gem:
 
-    gem install homebrew_automation -v 0.0.4
+    gem install homebrew_automation
 
-Note: Since I have no plans to keep the API nor CLI stable, please specify the
-Gem version.
+Note: Since I don't plan to put in any effort to keep the API nor CLI stable,
+please take note of which version of this Gem you are depending on, and stick
+to it. `gem install homebrew_automation -v some-version`.
 
 A one-off run to deploy pre-built binaries of a new version of your app
 (e.g. `easoncxz/app`) to users of your Tap:

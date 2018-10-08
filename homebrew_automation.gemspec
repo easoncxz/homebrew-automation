@@ -4,8 +4,7 @@ require './lib/homebrew_automation/version'
 Gem::Specification.new do |s|
   s.name = 'homebrew_automation'
   s.summary = 'Build bottles and update Formulae'
-  s.description = <<-HEREDOC
-    == Build Bottles and update Formulae
+  s.description = '== Build Bottles and update Formulae' + <<-HEREDOC
 
     This is a Ruby library, with a small CLI, for:
 
