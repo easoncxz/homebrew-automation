@@ -3,11 +3,21 @@ require './lib/homebrew_automation/version'
 
 Gem::Specification.new do |s|
   s.name = 'homebrew_automation'
-  s.summary = 'Automate editing of Homebrew Formula files'
+  s.summary = 'Build bottles and update Formulae'
   s.description = <<-HEREDOC
-    If you're thinking of manipulating Homebrew Formula files
-    e.g. during continuous integration, this is for you.
-    See the GitHub project page for usage details.
+    == Build Bottles and update Formulae
+
+    This is a Ruby library, with a small CLI, for:
+
+    - Editing Formula files programmatically;
+    - Building Bottles for an existing Formula;
+    - Uploading Bottles tarballs to Bintray;
+    - Searching for and gathering Bottle tarballs from Bintray; and
+    - Updating Formula files to refer to new Bottles, by committing to
+      the Tap Git repo.
+
+    I'll avoid repeating myself too much, so for more info, please look at the
+    README in the Github repo.
   HEREDOC
   s.author = 'easoncxz'
   s.email = 'me@easoncxz.com'
