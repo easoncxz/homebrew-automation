@@ -26,3 +26,6 @@ begin
 rescue LoadError
 end
 
+task :tag do
+  system 'git', 'tag', "v#{HomebrewAutomation::VERSION}"
+end
