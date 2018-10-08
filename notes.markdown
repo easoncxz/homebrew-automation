@@ -32,3 +32,12 @@ Related reading:
     h = RDoc::Markup::ToHtml.new(RDoc::Options.new)
     puts h.convert description
     ```
+
+- Insane problems with the interplay of RVM, macOS, and Homebrew, on Travis CI:
+  - `shell_session_update` error: <https://github.com/travis-ci/travis-ci/issues/6307>
+  - `Gemset '' does not exist` error: <https://github.com/travis-ci/travis-ci/issues/9404>
+  - `Homebrew must be run under Ruby 2.3!`:
+    - <https://github.com/Chatie/wechaty/issues/936>
+    - <https://github.com/travis-ci/travis-ci/issues/8552>
+  - `rvm is not a function`: <https://stackoverflow.com/questions/23963018/rvm-is-not-a-function-selecting-rubies-with-rvm-use-will-not-work>
+  - Ruby versions available on macOS environments on Travis CI: <http://rubies.travis-ci.org/>
