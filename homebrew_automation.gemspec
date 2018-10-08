@@ -4,21 +4,7 @@ require './lib/homebrew_automation/version'
 Gem::Specification.new do |s|
   s.name = 'homebrew_automation'
   s.summary = 'Build bottles and update Formulae'
-  s.description = '== Build Bottles and update Formulae' + <<-HEREDOC
-
-This is a Ruby library, with a small CLI, for:
-
-- Editing Formula files programmatically;
-- Building Bottles for an existing Formula;
-- Uploading Bottles tarballs to Bintray;
-- Searching for and gathering Bottle tarballs from Bintray; and
-- Updating Formula files to refer to new Bottles, by committing to
-  the Tap Git repo.
-
-I'll avoid repeating myself too much, so for more info, please look at the
-README in the Github repo.
-
-  HEREDOC
+  s.description = 'Build Bottles and update Formulae. Please see README on Github for details.'
   s.author = 'easoncxz'
   s.email = 'me@easoncxz.com'
   s.homepage = 'https://github.com/easoncxz/homebrew-automation'
