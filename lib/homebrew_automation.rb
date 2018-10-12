@@ -1,5 +1,5 @@
 
-# Helps you manipulate Homebrew Formula files, Bottles etc.
+# Help you manipulate Homebrew Formula files, Bottles etc.
 module HomebrewAutomation
 end
 

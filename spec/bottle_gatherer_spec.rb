@@ -18,7 +18,7 @@ describe "BottleGatherer" do
 
     it 'can figure out OS name from a bottle filename' do
       bottle_filename = "hack-assembler-0.1.1.17.high_sierra.bottle.tar.gz"
-      expect(gatherer.parse_for_os(bottle_filename)).to eq('high_sierra')
+      expect(gatherer._parse_for_os(bottle_filename)).to eq('high_sierra')
     end
 
     it 'finds one bottle' do

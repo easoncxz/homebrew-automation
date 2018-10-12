@@ -1,12 +1,15 @@
 
 module HomebrewAutomation
 
+  # Inspect version of the macOS we're running on
   class MacOS
 
-    # () -> String
+    # Identify the version of the macOS this is run on
     #
-    # Returns a representation of the macOS version name in a format recognised by Homebrew,
-    # in particular the Formula/Bottle DSL.
+    # Return a macOS version name in a convention recognised by Homebrew, in
+    # particular by the Formula/Bottle DSL.
+    #
+    # @return [String]
     def self.identify_version
       version = `sw_vers -productVersion`
       mac_to_homebrew.
@@ -15,6 +18,9 @@ module HomebrewAutomation
         first
     end
 
+    # Lookup table of numeric version patterns to Homebrew-recognised strings
+    #
+    # @return [Hash<Regexp, String>]
     def self.mac_to_homebrew
       {
         /^10.10/ => 'yosemite',

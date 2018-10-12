@@ -6,8 +6,14 @@ require 'rest-client'
 
 module HomebrewAutomation
 
+  # A bare-bones Bintray API client that implements only the methods needed for
+  # Homebrew things.
   class Bintray
 
+    # @param username [String] Bintray username; for me this was not my email address
+    # @param api_key [String] Bearer-token-like key; generated in the Bintray web UI
+    # @param http [RestClient.Class] The +RestClient+ class itself
+    # @param base_url [String] Include the +https://+; exclude the trailing slash.
     def initialize(
         username,
         api_key,
@@ -20,10 +26,15 @@ module HomebrewAutomation
       @http = http  # allow injecting mocks for testing
     end
 
-    # POST /packages/:subject/:repo/:package/versions
+    # <tt>POST /packages/:subject/:repo/:package/versions</tt>
     #
     # Redundant: Bintray seems to create nonexistant versions for you if you
     # just try to upload files into it.
+    #
+    # @param repo_name [String]
+    # @param package_name [String]
+    # @param version_name [String]
+    # @return [RestClient::Response]
     def create_version(repo_name, package_name, version_name)
       safe_repo = URI.escape(repo_name)
       safe_pkg = URI.escape(package_name)
@@ -34,11 +45,18 @@ module HomebrewAutomation
       )
     end
 
-    # PUT /content/:subject/:repo/:package/:version/:file_path[?publish=0/1][?override=0/1][?explode=0/1]
+    # <tt>PUT /content/:subject/:repo/:package/:version/:file_path[?publish=0/1][?override=0/1][?explode=0/1]</tt>
     #
     # Bintray seems to expect the byte sequence of the file to be written straight out into the
-    # HTTP request body, optionally via `Transfer-Encoding: chunked`. So we pass the `content` String
+    # HTTP request body, optionally via <tt>Transfer-Encoding: chunked</tt>. So we pass the +content+ String
     # straight through to RestClient
+    #
+    # @param repo_name [String]
+    # @param package_name [String]
+    # @param version_name [String]
+    # @param filename [String] The filename within one Bintray repository, e.g. +hack-assembler-0.1.1.17.high_sierra.bottle.tar.gz+
+    # @param content [String] The bytes for the file, e.g. from a +File.read+
+    # @return [RestClient::Response]
     def upload_file(repo_name, package_name, version_name, filename, content, publish: 1)
       safe_repo = URI.escape(repo_name)
       safe_pkg = URI.escape(package_name)
@@ -52,7 +70,14 @@ module HomebrewAutomation
       )
     end
 
-    # GET /packages/:subject/:repo/:package/versions/:version/files[?include_unpublished=0/1]
+    # <tt>GET /packages/:subject/:repo/:package/versions/:version/files[?include_unpublished=0/1]</tt>
+    #
+    # Useful when seeing what bottles have already been built.
+    #
+    # @param repo_name [String]
+    # @param package_name [String]
+    # @param version_name [String]
+    # @return [RestClient::Response]
     def get_all_files_in_version(repo_name, package_name, version_name)
       safe_repo = URI.escape(repo_name)
       safe_pkg = URI.escape(package_name)
@@ -62,21 +87,32 @@ module HomebrewAutomation
         auth_headers)
     end
 
+    # Bintray username, URI-escaped.
+    #
+    # @return [String]
     def safe_username
       URI.escape(@username)
     end
 
-    # Expand relative path
+    # Resolve a relative path into a URL using the current base_url
+    #
+    # @param slash_subpath [String]
+    # @return [String]
     def rel(slash_subpath)
       @base_url + slash_subpath
     end
 
+    # @return [Hash]
     def api_headers
       { "Content-Type" => "application/json" }.update auth_headers
     end
 
+    # Implement HTTP Basich Auth, as per RFC 7617.
+    #
+    # Let's not bring in a library just for these two lines.
+    #
+    # @return [Hash]
     def auth_headers
-      # As per RFC 7617
       cred = Base64.strict_encode64("#{@username}:#{@api_key}")
       { Authorization: "Basic #{cred}" }
     end

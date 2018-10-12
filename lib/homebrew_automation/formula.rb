@@ -7,16 +7,19 @@ Parser::Builders::Default.emit_procarg0 = true
 
 module HomebrewAutomation
 
-  # An internal representation of some Formula.rb Ruby source file, containing
-  # the definition of a Homebrew Bottle. See Homebrew docs for concepts:
-  # https://docs.brew.sh/Bottles.html
+  # An in-memory, programmable representation of some Formula.rb Ruby source
+  # file, containing the definition of a Homebrew Bottle. See Homebrew docs for
+  # concepts: https://docs.brew.sh/Bottles.html
   #
-  # Instance methods produce new instances where applicable, leaving all
+  # Instance methods produce new instances where sensible, leaving all
   # instances free from mutation.
+  #
+  # {#==} and {#hash} delegates to the underlying +Parser::AST::Node+.
   class Formula
 
-    # A constructor method that parses the string form of a Homebrew Formula
-    # source file into an internal representation
+    # Parse the string form of a Homebrew Formula source file into a {Formula}.
+    #
+    # {#to_s} is the inverse of this method.
     #
     # @return [Formula]
     def self.parse_string s
@@ -34,15 +37,17 @@ module HomebrewAutomation
     # Produce Homebrew Formula source code as a string, suitable for saving as
     # a Ruby source file.
     #
+    # This is the inverse of {.parse_string}.
+    #
     # @return [String]
     def to_s
       Unparser.unparse @ast
     end
 
-    # Update a field in the Formula
+    # Update a top-level field in the Formula
     #
-    # @param field [String] Name of the Formula field, e.g. `url`
-    # @param value [String] Value of the Formula field, e.g. `https://github.com/easoncxz/homebrew-automation`
+    # @param field [String] Name of the Formula field, e.g. +url+
+    # @param value [String] Value of the Formula field, e.g. +https://github.com/easoncxz/homebrew-automation+
     # @return [Formula] a new instance of Formula with the changes applied
     def update_field field, value
       Formula.new update(
@@ -59,6 +64,7 @@ module HomebrewAutomation
     #
     # @param url [String] URL of source tarball
     # @param sha256 [String] SHA256 sum of source tarball
+    # @return [Formula]
     def put_sdist url, sha256
       update_field("url", url).
       update_field("sha256", sha256)
@@ -76,10 +82,20 @@ module HomebrewAutomation
         put_bottle_version(os, sha256))
     end
 
+    # Both formulae are +==+, as per +Parser::AST::Node#==+.
+    #
+    # In practice, I think this means both formulae are equivalent in terms of
+    # Ruby semantics.
+    #
+    # @param o [Object] Expecting a {Formula}, really.
+    # @return [Boolean]
     def == o
       self.class == o.class && @ast == o.ast
     end
 
+    # Hash of the +Parser::AST::Node+
+    #
+    # @return [Integer]
     def hash
       @ast.hash
     end

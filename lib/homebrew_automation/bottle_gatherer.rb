@@ -4,43 +4,41 @@ require_relative './formula.rb'
 
 module HomebrewAutomation
 
-  # Some functions for figuring out, from files on Bintray, what values to use in bottle DSL.
+  # See what Bottles have already been built and uploaded to Bintray
   class BottleGatherer
 
-    # @param json [Hash]  List of files from Bintray
+    # @param json [Array<Hash>] JSON from a +RestClient::Response+ containing the list of files from Bintray
     def initialize(json)
       @json = json
       @bottles = nil
     end
 
-    # () -> Hash String String
+    # The bottles gathered.
     #
-    # Returns a hash with keys being OS names (in Homebrew-form) and values being SHA256 checksums
+    # @return [Hash<String, String>] with keys being OS names (in Homebrew-form) and values being SHA256 checksums
     def bottles
       return @bottles if @bottles
       pairs = @json.map do |f|
-        os = parse_for_os(f['name'])
+        os = _parse_for_os(f['name'])
         checksum = f['sha256']
         [os, checksum]
       end
       @bottles = Hash[pairs]
     end
 
-    # Formula -> Formula
-    #
     # Put all bottles gathered here into the given formula, then return the result
+    #
+    # @param formula [HomebrewAutomation::Formula]
+    # @return [HomebrewAutomation::Formula]
     def put_bottles_into(formula)
       bottles.reduce(formula) do |formula, (os, checksum)|
         formula.put_bottle(os, checksum)
       end
     end
 
-    #private
-
-    # String -> String
-    #
-    # filename -> OS name
-    def parse_for_os(bottle_filename)
+    # @param bottle_filename [String] filename
+    # @return [String] OS name
+    def _parse_for_os(bottle_filename)
       File.extname(
         File.basename(bottle_filename, '.bottle.tar.gz')).
       sub(/^\./, '')

@@ -6,25 +6,42 @@ module HomebrewAutomation
   # A representation of a source distribution tarball file
   class SourceDist
 
-    # @param tag [String] a Git tag, e.g. "v0.1.1.14"
+    # Assign args to attributes {#user}, {#repo}, {#tag}
     def initialize user, repo, tag
       @user = user
       @repo = repo
       @tag = tag
     end
 
-    attr_reader :user, :repo, :tag
+    # Github username, as appears in Github URLs
+    #
+    # @return [String]
+    attr_reader :user
 
-    # Calculate and return the file's checksum. Lazy and memoized.
+    # Github repo name, as appears in Github URLs
+    #
+    # @return [String]
+    attr_reader :repo
+
+    # Git tag name, as usable in +git+ commands
+    #
+    # @return [String]
+    attr_reader :tag
+
+    # Calculate and return the file's checksum.
+    #
+    # Lazy and memoized. Download the file if we haven't already.
     #
     # @return [String] hex-encoded string representation of the checksum
     def sha256
       @sha256 ||= Digest::SHA256.hexdigest contents
     end
 
-    # Fetch the file contents over HTTP. Lazy and memoized.
+    # Download and return the file contents.
     #
-    # @param fake [String] fake file contents (for testing)
+    # Lazy and memoized.
+    #
+    # @param fake [String] inject fake file contents (for testing)
     # @return [String] contents of the file
     def contents fake: nil
       @contents = @contents || fake ||
@@ -40,7 +57,7 @@ module HomebrewAutomation
         end
     end
 
-    # Pure
+    # The URL to the source tarball Github generates for tagged commits
     #
     # @return [String]
     def url

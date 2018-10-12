@@ -4,13 +4,18 @@ require_relative './bottle_gatherer.rb'
 
 module HomebrewAutomation
 
-  # Imperative glue code
+  # Imperative glue code.
   #
-  # Probably each method suits to become a CLI command.
+  # Each method in this class probably makes sense to be exposed as a CLI command.
   class Workflow
 
-    # @param tap [HomebrewAutomation::Tap]
-    # @param bintray [HomebrewAutomation::Bintray]
+    # Assign params to attributes.
+    #
+    # See {#tap} and {#bintray}.
+    #
+    # @param tap [Tap]
+    # @param bintray [Bintray]
+    # @param bintray_bottle_repo [String] Really should be somehow a part of the +bintray+ param
     def initialize(
         tap,
         bintray,
@@ -20,7 +25,26 @@ module HomebrewAutomation
       @bintray_bottle_repo = bintray_bottle_repo
     end
 
-    # Build a bottle from the given source tarball reference
+    # The Tap holding the Formulae for which we might want to build or publish bottles.
+    #
+    # @return [Tap]
+    attr_reader :tap
+
+    # An API client
+    #
+    # @return [Bintray]
+    attr_reader :bintray
+
+    # Build and upload a bottle.
+    #
+    # The Formula source comes from +source_dist+, and the Bottle tarball that
+    # is built goes to {#bintray}.
+    #
+    # +source_dist+ not only specifies the source tarball, but it also implies:
+    # - the formula name, as appears in the {#tap}, via {SourceDist#repo};
+    # - the Bintray package version, as to be uploaded, via {SourceDist#tag}, with any leading +v+ stripped off.
+    #
+    # The optional params overwrite the above implication.
     #
     # @param source_dist [HomebrewAutomation::SourceDist] Source tarball
     # @param formula_name [String] Formula name as appears in the Tap, which should be the same as the Bintray "Package" name
@@ -55,11 +79,15 @@ module HomebrewAutomation
       end
     end
 
-    # Look around on Bintray to see what bottles we've previously built, then
-    # push new commits into the Tap repository to register the new bottles.
+    # Gather and publish bottles.
     #
-    # @param formula_name [String]
-    # @param version_name [String] Bintray "Version" name, not a Git tag
+    # Look around on Bintray to see what Bottles we've already built and
+    # uploaded (as such "gathering" the bottles), then push new commits into
+    # the {#tap} repository to make an existing Formula aware of the Bottles
+    # we're gathered (as such "publishing" the bottles).
+    #
+    # @param formula_name [String] Both the Formula name in the Tap repo, and the Package name in the Bintray repo.
+    # @param version_name [String] Bintray "Version" name; not a Git tag.
     # @return [Formula]
     def gather_and_publish_bottles(formula_name, version_name)
       @tap.with_git_clone do
