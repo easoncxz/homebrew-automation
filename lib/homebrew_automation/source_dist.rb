@@ -1,5 +1,5 @@
 
-require 'http'
+require 'rest-client'
 
 module HomebrewAutomation
 
@@ -46,7 +46,7 @@ module HomebrewAutomation
     def contents fake: nil
       @contents = @contents || fake ||
         begin
-          resp = HTTP.follow.get url
+          resp = RestClient.get url
           case resp.code
           when 200
             resp.body.to_s
