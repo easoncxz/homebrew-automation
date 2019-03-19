@@ -89,6 +89,31 @@ end
     HEREDOC
   end
 
+  it 'can wipe out all pre-existing bottle references' do
+    formula_before = parsing_api INIT_FORMULA
+    formula_after = formula_before.rm_all_bottles
+    expect(formatting_api formula_after).to eq <<-HEREDOC.chomp
+class HackAssembler < Formula
+  desc("A toy assembler for the Hack machine language")
+  homepage("https://github.com/easoncxz/hack-assembler")
+  url("https://github.com/easoncxz/hack-assembler/archive/v0.1.1.4.tar.gz")
+  sha256("46823a63bf32b26f09764a70babe59190461f84f8f04be796465d0756698e2a3")
+  depends_on("haskell-stack" => :build)
+  bottle do
+    cellar(:any_skip_relocation)
+    rebuild(1)
+    root_url("https://dl.bintray.com/easoncxz/homebrew-bottles")
+  end
+  def install
+    system("echo", "whatever")
+  end
+  test do
+    system("echo", "just", "pass")
+  end
+end
+    HEREDOC
+  end
+
   it 'can overwrite existing bottle definitions' do
     formula_before = parsing_api INIT_FORMULA
     formula_after = formula_before.put_bottle("yosemite", "abcd")

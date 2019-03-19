@@ -12,7 +12,16 @@ describe 'The API of HomebrewAutomation' do
 
     it 'only has three own public instance methods' do
       expect(HomebrewAutomation::Formula.public_instance_methods(false).sort).
-        to eq([:==, :hash, :eql?, :to_s, :put_sdist, :update_field, :put_bottle].sort)
+        to eq([
+          :==,
+          :hash,
+          :eql?,
+          :to_s,
+          :put_sdist,
+          :update_field,
+          :put_bottle,
+          :rm_all_bottles,
+        ].sort)
     end
 
   end
