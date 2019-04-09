@@ -97,7 +97,7 @@ describe "HomebrewAutomation::Bintray" do
       _in, curl_out, _err = Open3.popen3(curl_command)
       expected_req = parse_request_io(curl_out)
 
-      bin = HomebrewAutomation::Bintray.new(user, api_key, base_url: "http://localhost:#{@echo_server_port}")
+      bin = HomebrewAutomation::Bintray::Client.new(user, api_key, base_url: "http://localhost:#{@echo_server_port}")
       actual_req = parse_request_io(StringIO.new(bin.upload_file(repo, package, version, filepath, contents).body))
 
       what_matters = [

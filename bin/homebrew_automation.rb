@@ -78,7 +78,7 @@ class WorkflowCommands < Thor
   def workflow
     HomebrewAutomation::Workflow.new(
       HomebrewAutomation::Tap.new(options[:tap_user], options[:tap_repo], options[:tap_token]),
-      HomebrewAutomation::Bintray.new(options[:bintray_user], options[:bintray_token]))
+      HomebrewAutomation::Bintray::Client.new(options[:bintray_user], options[:bintray_token]))
   end
 
 end

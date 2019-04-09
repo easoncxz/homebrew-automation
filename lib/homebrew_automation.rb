@@ -3,7 +3,7 @@
 module HomebrewAutomation
 end
 
-require_relative 'homebrew_automation/bintray.rb'
+require_relative 'homebrew_automation/bintray'
 require_relative 'homebrew_automation/bottle.rb'
 require_relative 'homebrew_automation/bottle_gatherer.rb'
 require_relative 'homebrew_automation/formula.rb'
