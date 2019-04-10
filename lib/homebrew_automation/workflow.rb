@@ -1,6 +1,6 @@
 
 require_relative './mac-os.rb'
-require_relative './bottle_gatherer.rb'
+require_relative './bintray.rb'
 
 module HomebrewAutomation
 
@@ -11,18 +11,15 @@ module HomebrewAutomation
 
     # Assign params to attributes.
     #
-    # See {#tap} and {#bintray}.
+    # See {#tap} and {#bclient}.
     #
     # @param tap [Tap]
-    # @param bintray [Bintray]
-    # @param bintray_bottle_repo [String] Really should be somehow a part of the +bintray+ param
-    def initialize(
-        tap,
-        bintray,
-        bintray_bottle_repo: 'homebrew-bottles')
+    # @param bclient [Bintray::Client]
+    # @param brepo [String] Bintray Repository name
+    def initialize(tap, bclient, brepo: 'homebrew-bottles')
       @tap = tap
-      @bintray = bintray
-      @bintray_bottle_repo = bintray_bottle_repo
+      @bclient = bclient
+      @brepo = brepo
     end
 
     # The Tap holding the Formulae for which we might want to build or publish bottles.
@@ -32,13 +29,13 @@ module HomebrewAutomation
 
     # An API client
     #
-    # @return [Bintray]
-    attr_reader :bintray
+    # @return [Bintray::Client]
+    attr_reader :bclient
 
     # Build and upload a bottle.
     #
     # The Formula source comes from +source_dist+, and the Bottle tarball that
-    # is built goes to {#bintray}.
+    # is built goes to Bintray.
     #
     # +source_dist+ not only specifies the source tarball, but it also implies:
     # - the formula name, as appears in the {#tap}, via {SourceDist#repo};
@@ -53,6 +50,7 @@ module HomebrewAutomation
     def build_and_upload_bottle(source_dist, formula_name: nil, version_name: nil)
       formula_name ||= source_dist.repo
       version_name ||= source_dist.tag.sub(/^v/, '')
+      bversion = Bintray::Version.new(@bclient, @brepo, formula_name, version_name)
       os_name = MacOS.identify_version
       @tap.with_git_clone do
         @tap.on_formula(formula_name) do |formula|
@@ -64,16 +62,8 @@ module HomebrewAutomation
         bottle = Bottle.new(local_tap_url, formula_name, os_name)
         bottle.build
 
-        @bintray.create_version(
-          @bintray_bottle_repo,
-          formula_name,
-          version_name)
-        @bintray.upload_file(
-          @bintray_bottle_repo,
-          formula_name,
-          version_name,
-          bottle.filename,
-          bottle.content)
+        @bversion.create!
+        @bversion.upload_file!(bottle.filename, bottle.content)
 
         bottle
       end
@@ -90,23 +80,14 @@ module HomebrewAutomation
     # @param version_name [String] Bintray "Version" name; not a Git tag.
     # @return [Formula]
     def gather_and_publish_bottles(formula_name, version_name)
+      bversion = Bintray::Version.new(@bclient, @brepo, formula_name, version_name)
       @tap.with_git_clone do
-        resp = @bintray.get_all_files_in_version(
-          @bintray_bottle_repo,
-          formula_name,
-          version_name)
-        unless (200..207) === resp.code
-          puts resp
-          raise StandardError.new(resp)
-        end
-
-        json = JSON.parse(resp.body)
-        gatherer = BottleGatherer.new(json)
-
         @tap.on_formula(formula_name) do |formula|
-          gatherer.put_bottles_into(formula)
+          bottles = bversion.gather_bottles
+          bottles.reduce(formula) do |f, (os, checksum)|
+            f.put_bottle(os, checksum)
+          end
         end
-
         @tap.git_config
         @tap.git_commit_am "Add bottles for #{formula_name}@#{version_name}"
         @tap.git_push
