@@ -51,8 +51,8 @@ class WorkflowCommands < Thor
         options[:source_user],
         options[:source_repo],
         options[:source_tag]),
-      formula_name: options[:formula_name],
-      version_name: options[:formula_version])
+      options[:formula_name] || options[:source_repo],
+      options[:formula_version] || options[:source_tag].sub(/^v/, ''))
   end
 
   desc 'gather-and-publish', 'Make the Tap aware of new Bottles'

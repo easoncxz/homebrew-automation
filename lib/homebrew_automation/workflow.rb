@@ -47,9 +47,7 @@ module HomebrewAutomation
     # @param formula_name [String] Formula name as appears in the Tap, which should be the same as the Bintray "Package" name
     # @param version_name [String] Bintray package "Version" name; defaults to stripping leading `v` from the Git tag.
     # @return [Bottle]
-    def build_and_upload_bottle(source_dist, formula_name: nil, version_name: nil)
-      formula_name ||= source_dist.repo
-      version_name ||= source_dist.tag.sub(/^v/, '')
+    def build_and_upload_bottle(source_dist, formula_name, version_name)
       bversion = Bintray::Version.new(@bclient, @brepo, formula_name, version_name)
       os_name = MacOS.identify_version
       @tap.with_git_clone do
@@ -93,7 +91,6 @@ module HomebrewAutomation
         @tap.git_push
       end
     end
-
 
   end
 
