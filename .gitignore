@@ -1,6 +1,7 @@
 
 # Vim
 .*.swp
+tags
 
 # Mac OS X
 **/.DS_Store

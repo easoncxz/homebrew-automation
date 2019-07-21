@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake', '~> 12.3'
   s.add_development_dependency 'pry-byebug', '~> 3.6'
   s.add_development_dependency 'yard'
+  s.add_development_dependency 'ripper-tags'
   s.add_runtime_dependency 'thor', '~> 0.20'
   s.add_runtime_dependency 'parser', '~> 2.4'
   s.add_runtime_dependency 'unparser', '~> 0.2'
