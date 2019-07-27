@@ -1,5 +1,5 @@
 
-require_relative './mac-os.rb'
+require_relative './mac_os.rb'
 require_relative './bintray.rb'
 require_relative './source_dist.rb'
 
