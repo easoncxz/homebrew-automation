@@ -4,6 +4,9 @@ require 'base64'
 require 'uri'
 require 'rest-client'
 
+module HomebrewAutomation
+end
+
 module HomebrewAutomation::Bintray
 
   # A bare-bones Bintray API client that implements only the methods needed for

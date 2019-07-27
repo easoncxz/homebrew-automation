@@ -5,7 +5,6 @@ end
 
 require_relative 'homebrew_automation/bintray'
 require_relative 'homebrew_automation/bottle.rb'
-require_relative 'homebrew_automation/bottle_gatherer.rb'
 require_relative 'homebrew_automation/formula.rb'
 require_relative 'homebrew_automation/mac_os.rb'
 require_relative 'homebrew_automation/source_dist.rb'

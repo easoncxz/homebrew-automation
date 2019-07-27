@@ -1,4 +1,9 @@
 
+require 'json'
+
+module HomebrewAutomation
+end
+
 module HomebrewAutomation::Bintray
 
   # A representation of a Bintray +Version+
