@@ -36,6 +36,25 @@ end
     formula.to_s
   end
 
+  it 'has one own public class methods' do
+    expect(HomebrewAutomation::Formula.methods(false).sort).
+      to eq([:parse_string])
+  end
+
+  it 'only has these own public instance methods' do
+    expect(HomebrewAutomation::Formula.public_instance_methods(false).sort).
+      to eq([
+        :==,
+        :hash,
+        :eql?,
+        :to_s,
+        :put_sdist,
+        :update_field,
+        :put_bottle,
+        :rm_all_bottles,
+      ].sort)
+  end
+
   it 'can modify the (source tarball) URL and sha256 fields of a Formula' do
     formula_before = parsing_api INIT_FORMULA
     formula_after = formula_before.put_sdist("https://google.com", "abcd")
