@@ -3,7 +3,6 @@ require 'homebrew_automation/bottle.rb'
 
 describe "HomebrewAutomation::Bottle" do
 
-  let (:json_content) { File.read "./data/sample-bottle.json" }
   let (:bottle_filename) { "hack-assembler-0.1.1.17.high_sierra.bottle.tar.gz" }
   let (:bottle_minus_minus) { "hack-assembler--0.1.1.17.high_sierra.bottle.tar.gz" }
 
