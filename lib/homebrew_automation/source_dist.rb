@@ -7,10 +7,11 @@ module HomebrewAutomation
   class SourceDist
 
     # Assign args to attributes {#user}, {#repo}, {#tag}
-    def initialize user, repo, tag
+    def initialize user, repo, tag, http: RestClient
       @user = user
       @repo = repo
       @tag = tag
+      @http = http
     end
 
     # Github username, as appears in Github URLs
@@ -41,12 +42,11 @@ module HomebrewAutomation
     #
     # Lazy and memoized.
     #
-    # @param fake [String] inject fake file contents (for testing)
     # @return [String] contents of the file
-    def contents fake: nil
-      @contents = @contents || fake ||
+    def contents
+      @contents = @contents ||
         begin
-          resp = RestClient.get url
+          resp = @http.get url
           case resp.code
           when 200
             resp.body.to_s

@@ -5,29 +5,13 @@ require 'rest-client'
 
 require 'homebrew_automation/bintray/version.rb'
 
+require_relative '../my_helpers.rb'
+
 describe "HomebrewAutomation::Bintray::Version" do
+  include MyHelpers
 
   let (:fake_response) do
-    response_filepath = "spec/data/sample-files-list.json"
-
-    # To fake a response: https://stackoverflow.com/questions/770748
-    # I have no idea why this has to be so complicated. I just want to
-    # hand-fabricate my own RestClient::Response. People also keep
-    # saying "webmock" or "FakeWeb" or something.
-    net_http_res = Net::HTTPResponse.new(1.0, 200, 'OK')
-    request = ->() do
-      # Outermost call first:
-      # https://www.rubydoc.info/gems/rest-client/RestClient/Response#create-class_method
-      # https://www.rubydoc.info/gems/rest-client/RestClient/AbstractResponse#response_set_vars-instance_method
-      # https://www.rubydoc.info/gems/rest-client/RestClient/AbstractResponse#history-instance_method
-      r = double('Maybe RestClient::Request')
-      allow(r).to(receive('redirection_history').and_return(nil))
-      r
-    end.call
-    RestClient::Response.create(
-      File.read(response_filepath),
-      net_http_res,
-      request)
+    make_response(body: File.read("spec/data/sample-files-list.json"))
   end
   let (:expected_bottles) do
     # coupled with above response_filepath
