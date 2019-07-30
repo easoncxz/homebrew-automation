@@ -30,29 +30,22 @@ class WorkflowCommands < Thor
   class_option :tap_user, :required => true
   class_option :tap_repo, :required => true
   class_option :tap_token, :required => true
+  class_option :formula_name
   class_option :bintray_user, :required => true
   class_option :bintray_token, :required => true
+  class_option :bintray_repo
+  class_option :bintray_package
+  class_option :bintray_version
 
   desc 'build-and-upload', 'Build binary tarball from source tarball, then upload to Bintray'
-  long_desc <<-HERE_HERE
-    Since we're uploading to Bintray, we need a Bintray API KEY at `bintray_token`.
-
-    `formula_name` defaults to the same as `source_repo`.
-    `formula_version` defaults to `source_tag` with a leading `v` stripped off.
-  HERE_HERE
   option :source_user, :required => true
   option :source_repo, :required => true
   option :source_tag, :required => true
-  option :formula_name
-  option :formula_version
+  long_desc <<-HERE_HERE
+    Since we're uploading to Bintray, we need a Bintray API KEY at `bintray_token`.
+  HERE_HERE
   def build_and_upload
-    workflow.build_and_upload_bottle(
-      HomebrewAutomation::SourceDist.new(
-        options[:source_user],
-        options[:source_repo],
-        options[:source_tag]),
-      formula_name: options[:formula_name],
-      version_name: options[:formula_version])
+    workflow.build_and_upload_bottle(sdist, tap, formula_name, bversion)
   end
 
   desc 'gather-and-publish', 'Make the Tap aware of new Bottles'
@@ -61,24 +54,49 @@ class WorkflowCommands < Thor
 
     Since we're publishing updates to the Formula in our Tap, we need Git push access to the
     Tap repo on Github via a Github OAuth token via `tap_token`.
-
-    `formula-name` should be both the formula name as appears in the Tap and also the Bintray package name.
-    `formula-version` should be the Bintray "Version" name.
   HERE_HERE
-  option :formula_name, :required => true
-  option :formula_version, :required => true
   def gather_and_publish
-    workflow.gather_and_publish_bottles(
-      options[:formula_name],
-      options[:formula_version])
+    workflow.gather_and_publish_bottles(tap, formula_name, bversion)
   end
 
   private
 
+  def sdist
+    HomebrewAutomation::SourceDist.new(
+      options[:source_user],
+      options[:source_repo],
+      options[:source_tag])
+  end
+
+  def tap
+    HomebrewAutomation::Tap.new(
+      options[:tap_user],
+      options[:tap_repo],
+      options[:tap_token])
+  end
+
+  # DOC: default values here
+  def formula_name
+    options[:formula_name] || sdist.repo
+  end
+
+  def bintray_client
+    HomebrewAutomation::Bintray::Client.new(
+      options[:bintray_user],
+      options[:bintray_token])
+  end
+
+  # DOC: default values here
+  def bintray_version
+    HomebrewAutomation::Bintray::Version.new(
+      bintray_client,
+      options[:bintray_repo] || "homebrew-bottles",
+      options[:bintray_package] || sdist.repo,
+      options[:bintray_version] || sdist.tag.sub(/^v/, ''))
+  end
+
   def workflow
-    HomebrewAutomation::Workflow.new(
-      HomebrewAutomation::Tap.new(options[:tap_user], options[:tap_repo], options[:tap_token]),
-      HomebrewAutomation::Bintray.new(options[:bintray_user], options[:bintray_token]))
+    HomebrewAutomation::Workflow.new
   end
 
 end
