@@ -18,15 +18,15 @@ module HomebrewAutomation
       @keep_submodule = keep_submodule
     end
 
-    # Github username, as appears in Github URLs
-    #
-    # @return [String]
-    attr_reader :user
-
     # Github repo name, as appears in Github URLs
     #
     # @return [String]
     attr_reader :repo
+
+    # Repo URL, as expected by Git
+    #
+    # @return [String]
+    attr_reader :url
 
     # Github OAuth token
     #
