@@ -9,6 +9,9 @@ module HomebrewAutomation
 end
 
 class HomebrewAutomation::CLI::WorkflowCommands < Thor
+  class_option :source_user, :required => true
+  class_option :source_repo, :required => true
+  class_option :source_tag, :required => true
   class_option :tap_user, :required => true
   class_option :tap_repo, :required => true
   class_option :tap_token, :required => true
@@ -20,9 +23,6 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
   class_option :bintray_version
 
   desc 'build-and-upload', 'Build binary tarball from source tarball, then upload to Bintray'
-  option :source_user, :required => true
-  option :source_repo, :required => true
-  option :source_tag, :required => true
   long_desc <<-HERE_HERE
     Since we're uploading to Bintray, we need a Bintray API KEY at `bintray_token`.
   HERE_HERE
@@ -38,7 +38,7 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
     Tap repo on Github via a Github OAuth token via `tap_token`.
   HERE_HERE
   def gather_and_publish
-    workflow.gather_and_publish_bottles(tap, formula_name, bintray_version)
+    workflow.gather_and_publish_bottles(sdist, tap, formula_name, bintray_version)
   end
 
   private

@@ -45,15 +45,20 @@ module HomebrewAutomation
     # the {#tap} repository to make an existing Formula aware of the Bottles
     # we're gathered (as such "publishing" the bottles).
     #
+    # @param sdist [SourceDist]
     # @param tap [Tap]
     # @param formula_name [String] the name of the formula in the Tap
     # @param bversion [Bintray::Version]
     # @return [Formula]
-    def gather_and_publish_bottles(tap, formula_name, bversion)
+    def gather_and_publish_bottles(sdist, tap, formula_name, bversion)
       tap.with_git_clone do
         tap.on_formula(formula_name) do |formula|
           bottles = bversion.gather_bottles
-          bottles.reduce(formula) do |f, (os, checksum)|
+          bottles.reduce(
+            formula.
+            put_sdist(sdist.url, sdist.sha256).
+            rm_all_bottles
+          ) do |f, (os, checksum)|
             f.put_bottle(os, checksum)
           end
         end
