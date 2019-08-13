@@ -27,7 +27,7 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
     Since we're uploading to Bintray, we need a Bintray API KEY at `bintray_token`.
   HERE_HERE
   def build_and_upload
-    workflow.build_and_upload_bottle(sdist, tap, formula_name, bversion)
+    workflow.build_and_upload_bottle(sdist, tap, formula_name, bintray_version)
   end
 
   desc 'gather-and-publish', 'Make the Tap aware of new Bottles'
@@ -38,7 +38,7 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
     Tap repo on Github via a Github OAuth token via `tap_token`.
   HERE_HERE
   def gather_and_publish
-    workflow.gather_and_publish_bottles(tap, formula_name, bversion)
+    workflow.gather_and_publish_bottles(tap, formula_name, bintray_version)
   end
 
   private
