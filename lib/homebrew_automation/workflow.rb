@@ -31,7 +31,9 @@ module HomebrewAutomation
         bottle = Bottle.new(local_tap_url, formula_name, os_name)
         bottle.build
 
-        bversion.create!
+        # Bintray auto-creates Versions on file-upload.
+        # Re-creating an existing Version results in a 409.
+        #bversion.create!
         bversion.upload_file!(bottle.filename, bottle.content)
 
         bottle
