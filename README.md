@@ -71,6 +71,10 @@ A one-off run to deploy pre-built binaries of a new version of your app
     # Now there are one new tarball sitting on Bintray.
 
     homebrew_automation.rb bottle gather-and-publish \
+        --source-repo       hack-assembler \
+        --source-tag        v0.1.1.17 \
+        --source-user       easoncxz \
+          \
         --formula-name      hack-assembler \
         --formula-version   0.1.1.17 \
           \
