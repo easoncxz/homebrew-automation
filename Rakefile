@@ -34,3 +34,7 @@ end
 task :tag do
   system 'git', 'tag', "v#{HomebrewAutomation::VERSION}"
 end
+
+task :docs do
+  system 'yard', 'server', '--reload'
+end

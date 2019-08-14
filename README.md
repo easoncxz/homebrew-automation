@@ -88,5 +88,12 @@ A one-off run to deploy pre-built binaries of a new version of your app
     # Now the Formula in the Tap refers to the new tarball we've just uploaded
     # onto Bintray.
 
+## More documentation
+
+I've written lots of code API docs (in YARD format). You can read them served up
+as HTML either by running `rake docs` and visiting <http://localhost:8808/>, or 
+by clicking the "Documentation" link on the RubyGems website, e.g.  
+<http://www.rubydoc.info/gems/homebrew_automation/0.1.0> .
+
 [tap]: https://docs.brew.sh/How-to-Create-and-Maintain-a-Tap<Paste>
 [github-token]: https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
