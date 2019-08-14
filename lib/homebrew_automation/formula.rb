@@ -82,6 +82,20 @@ module HomebrewAutomation
         put_bottle_version(os, sha256))
     end
 
+    # Remove sha256 references to all bottles
+    #
+    # This may leave the Formula in a non-standard state. Please add at lease
+    # one bottle referene back, otherwise why are you even declaring a bottles block
+    # at all.
+    #
+    # @return [Formula] a new instance of Formula with the changes applied
+    def rm_all_bottles
+      Formula.new update(
+        @ast,
+        bot_begin_path,
+        rm_all_bottle_sha256s)
+    end
+
     # Both formulae are +==+, as per +Parser::AST::Node#==+.
     #
     # In practice, I think this means both formulae are equivalent in terms of
@@ -134,6 +148,18 @@ module HomebrewAutomation
               by_os(os))
           # Then add the one we want
           ).push(new_sha256(sha256, os)))
+      }
+    end
+
+    # Drop all bottles
+    # rm_all_bottle_sha256s :: Proc (Node -> Node)
+    def rm_all_bottle_sha256s
+      -> (bot_begin) {
+        bot_begin.updated(
+          nil,  # keep the node type unchanged
+          bot_begin.children.reject(
+            # Get ride of all bottles condtionlessly
+            &by_msg('sha256')))
       }
     end
 

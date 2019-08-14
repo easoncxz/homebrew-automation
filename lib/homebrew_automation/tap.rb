@@ -18,15 +18,15 @@ module HomebrewAutomation
       @keep_submodule = keep_submodule
     end
 
-    # Github username, as appears in Github URLs
-    #
-    # @return [String]
-    attr_reader :user
-
     # Github repo name, as appears in Github URLs
     #
     # @return [String]
     attr_reader :repo
+
+    # Repo URL, as expected by Git
+    #
+    # @return [String]
+    attr_reader :url
 
     # Github OAuth token
     #
@@ -63,9 +63,9 @@ module HomebrewAutomation
     # @return [Formula] as returned from the block,
     #     assuming it obediantly returns a {Formula}.
     def on_formula(formula, &block)
-      name = "#{formula}.rb"
+      name = "#{formula}.rb"  # DOC
       block ||= ->(n) { n }
-      Dir.chdir 'Formula' do
+      Dir.chdir 'Formula' do  # DOC
         File.open name, 'r' do |old_file|
           File.open "#{name}.new", 'w' do |new_file|
             new_file.write(

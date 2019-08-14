@@ -1,7 +1,7 @@
 
 require './lib/homebrew_automation/version'
 
-task :default => [ :build ]
+task :default => [ :build, :rtags ]
 
 # Considering https://github.com/postmodern/rubygems-tasks
 desc 'Build Gem'
@@ -16,6 +16,11 @@ task :test_deps do
   if not system 'which http-echo-server'
     system 'npm -g install http-echo-server'
   end
+end
+
+desc 'Generate ctags file for vim'
+task :rtags do
+  system 'ripper-tags --recursive bin/ lib/'
 end
 
 begin
