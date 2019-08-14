@@ -11,7 +11,12 @@ module HomebrewAutomation
     #
     # @return [String]
     def self.identify_version
-      version = `sw_vers -productVersion`
+      version =
+        begin
+          `sw_vers -productVersion`
+        rescue Errno::ENOENT    # if we're not on a Mac
+          nil
+        end
       mac_to_homebrew.
         select { |pattern, _| pattern === version }.
         map { |_, description| description }.
