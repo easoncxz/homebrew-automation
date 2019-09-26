@@ -9,6 +9,11 @@ module HomebrewAutomation
 
     class MyCliApp < Thor
 
+      desc 'version', 'version of homebrew_automation'
+      def version
+        puts HomebrewAutomation::VERSION
+      end
+
       desc 'formula (...)', 'Modify Formula DSL source (read stdin, write stdout)'
       subcommand "formula", FormulaCommands
 

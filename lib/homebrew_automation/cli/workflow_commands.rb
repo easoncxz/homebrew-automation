@@ -21,13 +21,15 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
   class_option :bintray_repo
   class_option :bintray_package
   class_option :bintray_version
+  class_option :keep_tap_repo, :type => :boolean
 
   desc 'build-and-upload', 'Build binary tarball from source tarball, then upload to Bintray'
   long_desc <<-HERE_HERE
     Since we're uploading to Bintray, we need a Bintray API KEY at `bintray_token`.
   HERE_HERE
+  option :keep_brew_tmp, :type => :boolean
   def build_and_upload
-    workflow.build_and_upload_bottle(sdist, tap, formula_name, bintray_version)
+    workflow.build_and_upload_bottle(sdist, tap, formula_name, bintray_version, keep_homebrew_tmp: option[:keep_brew_tmp])
   end
 
   desc 'gather-and-publish', 'Make the Tap aware of new Bottles'
@@ -50,11 +52,16 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
       options[:source_tag])
   end
 
+  def keep_tap_repo?
+    options[:keep_tap_repo]
+  end
+
   def tap
     HomebrewAutomation::Tap.new(
       options[:tap_user],
       options[:tap_repo],
-      options[:tap_token])
+      options[:tap_token],
+      keep_submodule: keep_tap_repo?)
   end
 
   # DOC: default values here

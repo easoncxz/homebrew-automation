@@ -11,18 +11,21 @@ module HomebrewAutomation
     # @param os_name [String] As known by Homebrew, e.g. +el_capitan+
     # @param filename [String] ???
     # @param content [String] ???
+    # @param keep_tmp [Boolean] pass +--keep-tmp+ to +brew+
     def initialize(
         tap_url,
         formula_name,
         os_name,
         filename: nil,
-        content: nil)
+        content: nil,
+        keep_tmp: false)
       @tap_url = tap_url
       @formula_name = formula_name
       @os_name = os_name
       @filename = filename
       @minus_minus = nil  # https://github.com/Homebrew/brew/pull/4612
       @content = content
+      @keep_tmp = keep_tmp
     end
 
     # Takes ages to run, just like if done manually
@@ -30,9 +33,10 @@ module HomebrewAutomation
     # @raise [StandardError]
     # @return [nil]
     def build
-      die unless system 'brew', 'tap', local_tap_name, @tap_url
-      die unless system 'brew', 'install', '--verbose', '--build-bottle', @formula_name
-      die unless system 'brew', 'bottle', '--verbose', '--json', @formula_name
+      die unless system 'brew', 'tap', tmp_tap_name, @tap_url
+      maybe_keep_tmp = @keep_tmp ? '--keep-tmp' : ''
+      die unless system 'brew', 'install', '--verbose', maybe_keep_tmp, '--build-bottle', fully_qualified_formula_name
+      die unless system 'brew', 'bottle', '--verbose', '--json', '--no-rebuild', fully_qualified_formula_name
     end
 
     # Read and analyse metadata JSON file
@@ -82,8 +86,12 @@ module HomebrewAutomation
     private
 
     # A name for the temporary tap; doesn't really matter what this is.
-    def local_tap_name
-      'easoncxz/local-tap'
+    def tmp_tap_name
+      'easoncxz/tmp-tap'
+    end
+
+    def fully_qualified_formula_name
+      tmp_tap_name + '/' + @formula_name
     end
 
     def die
