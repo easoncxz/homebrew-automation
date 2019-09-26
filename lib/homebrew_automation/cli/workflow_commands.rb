@@ -29,7 +29,12 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
   HERE_HERE
   option :keep_brew_tmp, :type => :boolean
   def build_and_upload
-    workflow.build_and_upload_bottle(sdist, tap, formula_name, bintray_version, keep_homebrew_tmp: option[:keep_brew_tmp])
+    workflow.build_and_upload_bottle(
+      sdist,
+      tap,
+      formula_name,
+      bintray_version,
+      keep_homebrew_tmp: options[:keep_brew_tmp])
   end
 
   desc 'gather-and-publish', 'Make the Tap aware of new Bottles'
