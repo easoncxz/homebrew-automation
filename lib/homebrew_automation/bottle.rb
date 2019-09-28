@@ -34,8 +34,9 @@ module HomebrewAutomation
     # @return [nil]
     def build
       die unless system 'brew', 'tap', tmp_tap_name, @tap_url
-      maybe_keep_tmp = @keep_tmp ? '--keep-tmp' : ''
-      die unless system 'brew', 'install', '--verbose', maybe_keep_tmp, '--build-bottle', fully_qualified_formula_name
+      maybe_keep_tmp = @keep_tmp ? ['--keep-tmp'] : []
+      install_cmd = ['brew', 'install', '--verbose'] + maybe_keep_tmp + ['--build-bottle', fully_qualified_formula_name]
+      die unless system(*install_cmd)
       die unless system 'brew', 'bottle', '--verbose', '--json', '--no-rebuild', fully_qualified_formula_name
     end
 
