@@ -33,11 +33,11 @@ module HomebrewAutomation
     # @raise [StandardError]
     # @return [nil]
     def build
-      die unless system 'brew', 'tap', tmp_tap_name, @tap_url
+      complain unless system 'brew', 'tap', tmp_tap_name, @tap_url
       maybe_keep_tmp = @keep_tmp ? ['--keep-tmp'] : []
       install_cmd = ['brew', 'install', '--verbose'] + maybe_keep_tmp + ['--build-bottle', fully_qualified_formula_name]
-      die unless system(*install_cmd)
-      die unless system 'brew', 'bottle', '--verbose', '--json', '--no-rebuild', fully_qualified_formula_name
+      complain unless system(*install_cmd)
+      complain unless system 'brew', 'bottle', '--verbose', '--json', '--no-rebuild', fully_qualified_formula_name
     end
 
     # Read and analyse metadata JSON file
@@ -49,11 +49,11 @@ module HomebrewAutomation
         return locate_tarball
       end
       json = JSON.parse(File.read(json_filename))
-      focus = json || die
-      focus = focus[json.keys.first] || die
-      focus = focus['bottle'] || die
-      focus = focus['tags'] || die
-      focus = focus[@os_name] || die
+      focus = json || complain
+      focus = focus[json.keys.first] || complain
+      focus = focus['bottle'] || complain
+      focus = focus['tags'] || complain
+      focus = focus[@os_name] || complain
       @minus_minus, @filename = focus['local_filename'], focus['filename']
     end
 
@@ -95,8 +95,9 @@ module HomebrewAutomation
       tmp_tap_name + '/' + @formula_name
     end
 
-    def die
-      raise StandardError.new
+    def complain
+      puts "HEY! Something has gone wrong and I need to complain. Stacktrace follows:"
+      puts caller
     end
 
   end

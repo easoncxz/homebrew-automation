@@ -99,30 +99,31 @@ module HomebrewAutomation
     # @param msg [String] Git commit message
     # @raise [StandardError]
     def git_commit_am(msg)
-      die unless system "git", "commit", "-am", msg
+      complain unless system "git", "commit", "-am", msg
     end
 
     # Just +git push+
     #
     # @raise [StandardError]
     def git_push
-      die unless system "git", "push"
+      complain unless system "git", "push"
     end
 
     # @raise [StandardError]
     def _git_clone
-      die unless system "git", "clone", @url
+      complain unless system "git", "clone", @url
     end
 
     # @raise [StandardError]
     def _remove_git_submodule
-      die unless system "rm", "-rf", @repo
+      complain unless system "rm", "-rf", @repo
     end
 
     private
 
-    def die
-      raise StandardError.new
+    def complain
+      puts "HEY! Something has gone wrong and I need to complain. Stacktrace follows:"
+      puts caller
     end
 
   end
