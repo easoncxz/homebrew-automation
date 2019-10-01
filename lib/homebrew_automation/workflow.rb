@@ -18,17 +18,31 @@ module HomebrewAutomation
     # @param tap [Tap]
     # @param formula_name [String] the name of the formula in the Tap
     # @param bversion [Bintray::Version]
+    #
+    # @param mac_os [Class] the MacOS class
+    # @param bottle [Class] the Bottle class
+    # @param file [Class] the File class
+    # @param keep_homebrew_tmp [Boolean] keep the HOMEBREW_TEMP directory
+    #
     # @return [Bottle]
-    def build_and_upload_bottle(sdist, tap, formula_name, bversion, keep_homebrew_tmp: false)
-      os_name = MacOS.identify_version
+    def build_and_upload_bottle(
+        sdist,
+        tap,
+        formula_name,
+        bversion,
+        mac_os: MacOS,
+        bottle: Bottle,
+        file: File,
+        keep_homebrew_tmp: false)
+      os_name = mac_os.identify_version
       tap.with_git_clone do
         tap.on_formula(formula_name) do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)
         end
         tap.git_commit_am "Throwaway commit; just for building bottles"
 
-        local_tap_url = File.realpath('.')
-        bottle = Bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
+        local_tap_url = file.realpath('.')
+        bottle = bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
         bottle.build
 
         # Bintray auto-creates Versions on file-upload.

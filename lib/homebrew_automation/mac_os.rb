@@ -9,18 +9,20 @@ module HomebrewAutomation
     # Return a macOS version name in a convention recognised by Homebrew, in
     # particular by the Formula/Bottle DSL.
     #
-    # @return [String]
+    # @return [Eff<String | NilClass>]
     def self.identify_version
-      version =
+      Eff.new do
         begin
           `sw_vers -productVersion`
         rescue Errno::ENOENT    # if we're not on a Mac
           nil
         end
-      mac_to_homebrew.
-        select { |pattern, _| pattern === version }.
-        map { |_, description| description }.
-        first
+      end.bind! do |version|
+        mac_to_homebrew.
+          select { |pattern, _| pattern === version }.
+          map { |_, description| description }.
+          first
+      end
     end
 
     # Lookup table of numeric version patterns to Homebrew-recognised strings
