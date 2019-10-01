@@ -1,4 +1,6 @@
 
+require_relative './effects.rb'
+
 module HomebrewAutomation
 
   # Inspect version of the macOS we're running on
@@ -11,13 +13,13 @@ module HomebrewAutomation
     #
     # @return [Eff<String | NilClass>]
     def self.identify_version
-      Eff.new do
+      Effects::Eff.new do
         begin
           `sw_vers -productVersion`
         rescue Errno::ENOENT    # if we're not on a Mac
           nil
         end
-      end.bind! do |version|
+      end.map! do |version|
         mac_to_homebrew.
           select { |pattern, _| pattern === version }.
           map { |_, description| description }.

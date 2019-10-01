@@ -34,7 +34,7 @@ module HomebrewAutomation
         bottle: Bottle,
         file: File,
         keep_homebrew_tmp: false)
-      os_name = mac_os.identify_version
+      mac_os.identify_version.map! do |os_name|
       tap.with_git_clone do
         tap.on_formula(formula_name) do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)
@@ -51,6 +51,7 @@ module HomebrewAutomation
         bversion.upload_file!(bottle.filename, bottle.content)
 
         bottle
+      end
       end
     end
 
