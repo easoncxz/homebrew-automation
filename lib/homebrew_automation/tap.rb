@@ -37,7 +37,7 @@ module HomebrewAutomation
 
     # +pushd+ into a fresh clone, call the block, then clean-up.
     #
-    # Haskell-y type: +forall a. &Block (() -> a) -> a+
+    # Haskell-y type: +forall a. &Block (String -> a) -> a+
     #
     # @yield [String] Basename of the Tap repo directory we've just chdir'd into
     # @return Whatever the block returns
@@ -52,7 +52,7 @@ module HomebrewAutomation
 
     # Overwrite the specified Formula file, in-place, on-disk
     #
-    # Haskell-y type: <tt>(String, &Block (Formula -> Formula)) -> nil</tt>
+    # Haskell-y type: <tt>(String, &Block (Formula -> Formula)) -> Formula</tt>
     #
     # If no block is passed, then this tries to find the formula file, but then
     # does nothing.
@@ -60,6 +60,7 @@ module HomebrewAutomation
     # @param formula [String] Part of the name to the file within the +Formula+
     #     directory inside the Tap repo's directory, excluding the +.rb+ suffix.
     # @yield [Formula]
+    # @yieldreturn [Formula]
     # @return [Formula] as returned from the block,
     #     assuming it obediantly returns a {Formula}.
     def on_formula(formula, &block)

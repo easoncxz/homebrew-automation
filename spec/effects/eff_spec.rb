@@ -142,6 +142,19 @@ describe 'HomebrewAutomation::Effects' do
         expect(get_three.run!).to be 4    # mutated
       end
 
+      it 'does NOT mutate the Eff given in the parametre even if you call #apply! and #run!' do
+        get_four = get_three.apply!(get_incr)
+        expect(get_four.run!).to be 4
+        incr = get_incr.run!
+        expect(incr).to match Proc
+        expect(incr.call(5)).to be 6
+      end
+
+      it 'welcomes the use of lambdas' do
+        get_incr = eff.pure(->(x) { x + 1 })
+        expect(get_three.apply(get_incr).run!).to be 4
+      end
+
     end
 
     describe 'how to put things together to achieve imperative code' do
