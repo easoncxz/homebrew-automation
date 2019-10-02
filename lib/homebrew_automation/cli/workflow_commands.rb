@@ -34,7 +34,7 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
       tap,
       formula_name,
       bintray_version,
-      keep_homebrew_tmp: options[:keep_brew_tmp])
+      keep_homebrew_tmp: options[:keep_brew_tmp]).run!
   end
 
   desc 'gather-and-publish', 'Make the Tap aware of new Bottles'
