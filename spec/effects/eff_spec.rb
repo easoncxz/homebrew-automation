@@ -182,6 +182,21 @@ describe 'HomebrewAutomation::Effects' do
 
     end
 
+    describe 'performance of Eff' do
+
+      let(:incr) { Proc.new do |x| eff.pure(x + 1) end }
+
+      it 'can chain together 100k actions without any stack overflows' do
+        count = 100_000
+        num = eff.pure 0
+        count.times do
+          num = num.bind! &incr
+        end
+        expect(num.run!).to be(count)
+      end
+
+    end
+
   end
 
 end
