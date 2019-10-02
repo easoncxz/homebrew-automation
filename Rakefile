@@ -36,5 +36,6 @@ task :tag do
 end
 
 task :docs do
+  system 'rm', '-rf', '.yardoc/'
   system 'yard', 'server', '--reload'
 end
