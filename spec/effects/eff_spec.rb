@@ -332,7 +332,7 @@ describe 'HomebrewAutomation::Effects' do
     it 'binds as if a flat_map would' do
       expect(many.from_array([1, 2, 3]).bind do |x|
         many.from_array [x, x, x]
-      end).to eq([1, 1, 1, 2, 2, 2, 3, 3, 3])
+      end.run!).to eq([1, 1, 1, 2, 2, 2, 3, 3, 3])
     end
 
     it 'enumerates in outer-major order' do
