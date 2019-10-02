@@ -353,6 +353,21 @@ describe 'HomebrewAutomation::Effects' do
       )
     end
 
+    it 'collapses possibilities everywhere if there is an empty array anywhere' do
+      get_number = many.from_array [1, 2, 3]
+      no_choice = many.from_array []
+      get_letter = many.from_array ['a', 'b']
+      triplets =
+        get_number.bind do |n|
+          no_choice.bind do |absurd|
+            get_letter.bind do |c|
+              many.pure [n, absurd, c]
+            end
+          end
+        end
+      expect(triplets.run!).to eq []
+    end
+
   end
 
 end
