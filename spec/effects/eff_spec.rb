@@ -225,7 +225,7 @@ describe 'HomebrewAutomation::Effects' do
             end.rescuing(type: FoobarError) do |e|
               expect(e).to match FoobarError
               rescue_team.go
-              42
+              eff.pure 42
             end
           expect(m.run!).to be 42
         end
@@ -238,11 +238,11 @@ describe 'HomebrewAutomation::Effects' do
               raise StandardError, 'oh no!'
             end.rescuing(type: FoobarError) do
               foobar_team.go
-              0
+              eff.pure 0
             end.rescuing do |std|
               expect(std).to match StandardError
               useful_team.go
-              42
+              eff.pure 42
             end
           expect(foobar_team).not_to receive :go
           expect(useful_team).to receive :go
@@ -257,11 +257,11 @@ describe 'HomebrewAutomation::Effects' do
               raise FoobarError, 'oh no!'
             end.rescuing(type: FoobarError) do
               foobar_team.go
-              'foobar!'
+              eff.pure 'foobar!'
             end.rescuing do |std|
               expect(std).to match StandardError
               nahnah_team.go
-              0
+              eff.pure 0
             end
           expect(foobar_team).to receive :go
           expect(nahnah_team).not_to receive :go
@@ -276,7 +276,7 @@ describe 'HomebrewAutomation::Effects' do
             end.ensuring do
               resource.cleanup
             end.rescuing do
-              'saved!'
+              eff.pure 'saved!'
             end
           expect(resource).to receive(:cleanup)
           expect(m.run!).to eq 'saved!'
@@ -308,7 +308,7 @@ describe 'HomebrewAutomation::Effects' do
             end.rescuing do
               # notice we're using a zero-argument block
               # but Procs save us from ArgumentErrors.
-              'saved!'
+              eff.pure 'saved!'
             end.ensuring do
               resource.cleanup
             end

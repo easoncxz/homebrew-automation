@@ -223,11 +223,12 @@ module HomebrewAutomation::Effects
 
     # Wrap this Eff inside a bigger Eff with a begin-rescue block
     #
-    # @param type [Class] the type of error to rescue
+    # @param type [Class] the type of error to rescue; optional, with
+    # +StandardError+ being the default
     # @yieldparam [e] the exception you're rescuing; use a block/Proc
     #   instead of a lambda if you don't care and don't want
     #   an ArgumentError for a mismatching argument count.
-    # @yieldreturn [a] post-rescue value; please use the same type as
+    # @yieldreturn [Eff<a>] rescue plan; please use the same type as
     #   the original Eff would return
     # @return [Eff<a>] an Eff with the original type
     def rescuing(type: StandardError, &block)
@@ -235,7 +236,7 @@ module HomebrewAutomation::Effects
         begin
           self.run!
         rescue type => e
-          block.call(e)
+          block.call(e).run!
         end
       end
     end
