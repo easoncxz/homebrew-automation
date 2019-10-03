@@ -1,10 +1,13 @@
 
 require_relative "formula.rb"
+require_relative "effects/eff.rb"
 
 module HomebrewAutomation
 
   # A representation of a Github repo that acts as a Homebrew Tap.
   class Tap
+
+    Eff = HomebrewAutomation::Effects::Eff
 
     # Assign params to attributes.
     #
@@ -40,12 +43,12 @@ module HomebrewAutomation
     # Haskell-y type: +forall a. &Block (String -> a) -> a+
     #
     # @yield [String] Basename of the Tap repo directory we've just chdir'd into
-    # @return Whatever the block returns
+    # @yieldreturn [Eff<a>] something to do
+    # @return [Eff<a>] doing that thing inside the cloned directory
     def with_git_clone(&block)
-      begin
-        _git_clone
-        Dir.chdir @repo, &block
-      ensure
+      _git_clone.map! do
+        Dir.chdir(@repo, &block)  # TODO: reify
+      end.ensuring do
         _remove_git_submodule unless @keep_submodule
       end
     end
@@ -100,29 +103,34 @@ module HomebrewAutomation
     # @param msg [String] Git commit message
     # @raise [StandardError]
     def git_commit_am(msg)
-      complain unless system "git", "commit", "-am", msg
+      complain! unless system "git", "commit", "-am", msg
     end
 
     # Just +git push+
     #
     # @raise [StandardError]
     def git_push
-      complain unless system "git", "push"
+      complain! unless system "git", "push"
     end
 
-    # @raise [StandardError]
+    # @return [Eff<NilClass>]
     def _git_clone
-      complain unless system "git", "clone", @url
+      Eff.new do
+        complain! unless system "git", "clone", @url
+      end
     end
 
-    # @raise [StandardError]
+    # @return [Eff<NilClass>]
     def _remove_git_submodule
-      complain unless system "rm", "-rf", @repo
+      Eff.new do
+        complain! unless system "rm", "-rf", @repo
+      end
     end
 
     private
 
-    def complain
+    # Impure
+    def complain!
       puts "HEY! Something has gone wrong and I need to complain. Stacktrace follows:"
       puts caller
     end
