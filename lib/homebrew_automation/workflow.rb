@@ -69,7 +69,7 @@ module HomebrewAutomation
     # @param tap [Tap]
     # @param formula_name [String] the name of the formula in the Tap
     # @param bversion [Bintray::Version]
-    # @return [Formula]
+    # @return [Eff<Formula>]
     def gather_and_publish_bottles(sdist, tap, formula_name, bversion)
       tap.with_git_clone do
         tap.on_formula formula_name do |formula|

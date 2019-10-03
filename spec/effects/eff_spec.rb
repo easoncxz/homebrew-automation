@@ -274,7 +274,9 @@ describe 'HomebrewAutomation::Effects' do
             eff.new do
               raise StandardError 'oh no'
             end.ensuring do
-              resource.cleanup
+              eff.new do
+                resource.cleanup
+              end
             end.rescuing do
               eff.pure 'saved!'
             end
@@ -292,7 +294,9 @@ describe 'HomebrewAutomation::Effects' do
             eff.new do
               raise StandardError.new, 'ham'
             end.ensuring do
-              resource.cleanup
+              eff.new do
+                resource.cleanup
+              end
             end
           expect(resource).to receive(:cleanup)
           expect do
@@ -310,7 +314,9 @@ describe 'HomebrewAutomation::Effects' do
               # but Procs save us from ArgumentErrors.
               eff.pure 'saved!'
             end.ensuring do
-              resource.cleanup
+              eff.new do
+                resource.cleanup
+              end
             end
           expect(resource).to receive(:cleanup)
           expect(m.run!).to eq 'saved!'

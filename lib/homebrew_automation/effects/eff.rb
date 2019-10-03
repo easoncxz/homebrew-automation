@@ -208,15 +208,15 @@ module HomebrewAutomation::Effects
     # Wrap this Eff inside a bigger Eff with a begin-ensure block
     #
     # @yieldparam [] no parametres
-    # @yieldreturn [b] anything; it's ignored, just like in
-    #   begin-ensure syntax
+    # @yieldreturn [Eff<b>] an effect that returns anything;
+    #   the value is ignored, just like in begin-ensure syntax
     # @return [Eff<a>] an Eff with the original type
     def ensuring(&block)
       Eff.new do
         begin
           self.run!
         ensure
-          block.call
+          block.call.run!
         end
       end
     end
@@ -239,6 +239,39 @@ module HomebrewAutomation::Effects
           block.call(e).run!
         end
       end
+    end
+
+    # Throw away the resulting value, keep the effect
+    #
+    # @param eff [Eff<b>] some effect
+    # @return [Eff<NilClass>] the same effect, but with the return
+    #   value discarded
+    def self.void_(eff)
+      eff.map do |_|
+        nil
+      end
+    end
+
+    # Conditionally execute, then void the value
+    #
+    # @param cond [Boolean] condition
+    # @param eff [Eff<b>] what to do if condition is true
+    # @return [Eff<NilClass>] void the result
+    def self.when_(cond, eff)
+      if cond then
+        Eff.void_ eff
+      else
+        Eff.pure nil
+      end
+    end
+
+    # Same as {#when}, but with the condition negated
+    #
+    # @param cond [Boolean] condition
+    # @param eff [Eff<b>] what to do if condition is true
+    # @return [Eff<NilClass>] void the result
+    def self.exceptWhen(cond, eff)
+      self.when_((not cond), eff)
     end
 
     private

@@ -52,7 +52,7 @@ module HomebrewAutomation
           block.call(basename).run!
         end
       end.ensuring do
-        _remove_git_submodule unless @keep_submodule
+        Eff.exceptWhen @keep_submodule, _remove_git_submodule
       end
     end
 
