@@ -210,6 +210,116 @@ describe 'HomebrewAutomation::Effects' do
 
     end
 
+    describe 'exception handling' do
+
+      describe 'rescuing' do
+        class FoobarError < StandardError
+        end
+
+        it 'does indeed rescue errors' do
+          rescue_team = double
+          expect(rescue_team).to receive(:go)
+          m =
+            eff.new do
+              raise FoobarError, 'um'
+            end.rescuing(type: FoobarError) do |e|
+              expect(e).to match FoobarError
+              rescue_team.go
+              42
+            end
+          expect(m.run!).to be 42
+        end
+
+        it 'can catch errors later in the chain' do
+          foobar_team = double
+          useful_team = double
+          m =
+            eff.new do
+              raise StandardError, 'oh no!'
+            end.rescuing(type: FoobarError) do
+              foobar_team.go
+              0
+            end.rescuing do |std|
+              expect(std).to match StandardError
+              useful_team.go
+              42
+            end
+          expect(foobar_team).not_to receive :go
+          expect(useful_team).to receive :go
+          expect(m.run!).to eq 42
+        end
+
+        it 'can catch errors early in the chain and not have later rescues run' do
+          foobar_team = double
+          nahnah_team = double
+          m =
+            eff.new do
+              raise FoobarError, 'oh no!'
+            end.rescuing(type: FoobarError) do
+              foobar_team.go
+              'foobar!'
+            end.rescuing do |std|
+              expect(std).to match StandardError
+              nahnah_team.go
+              0
+            end
+          expect(foobar_team).to receive :go
+          expect(nahnah_team).not_to receive :go
+          expect(m.run!).to eq 'foobar!'
+        end
+
+        it 'works around #ensuring' do
+          resource = double
+          m =
+            eff.new do
+              raise StandardError 'oh no'
+            end.ensuring do
+              resource.cleanup
+            end.rescuing do
+              'saved!'
+            end
+          expect(resource).to receive(:cleanup)
+          expect(m.run!).to eq 'saved!'
+        end
+
+      end
+
+      describe 'ensuring' do
+
+        it 'runs when an error is thrown, and then bubbles the error' do
+          resource = double
+          m =
+            eff.new do
+              raise StandardError.new, 'ham'
+            end.ensuring do
+              resource.cleanup
+            end
+          expect(resource).to receive(:cleanup)
+          expect do
+            m.run!
+          end.to raise_error(StandardError, 'ham')
+        end
+
+        it 'works around #rescuing' do
+          resource = double
+          m =
+            eff.new do
+              raise StandardError 'oh no'
+            end.rescuing do
+              # notice we're using a zero-argument block
+              # but Procs save us from ArgumentErrors.
+              'saved!'
+            end.ensuring do
+              resource.cleanup
+            end
+          expect(resource).to receive(:cleanup)
+          expect(m.run!).to eq 'saved!'
+        end
+
+      end
+
+    end
+
   end
 
 end

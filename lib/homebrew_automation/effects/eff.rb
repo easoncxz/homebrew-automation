@@ -12,8 +12,9 @@ module HomebrewAutomation::Effects
   # parametre, i.e. +Eff<a>+.
   #
   # Error handling::
-  #   Exceptions would just bubble through the usual way,
-  #   forfeiting unexecuted actions in the Effect.
+  #   Look ma, I've implemented begin-rescue-ensure via the
+  #   methods {#rescuing} and {#ensuring}. They work like you'd
+  #   expect, and seemingly the same as JavaScript Promises.
   #
   # Concurrency and parallelism etc.::
   #   not considered, but should be safe and easy to add
@@ -200,6 +201,41 @@ module HomebrewAutomation::Effects
         # We must call #bind, not #bind!, on eff_func, below:
         eff_func.bind do |func|
           Eff.pure(func.call(x))
+        end
+      end
+    end
+
+    # Wrap this Eff inside a bigger Eff with a begin-ensure block
+    #
+    # @yieldparam [] no parametres
+    # @yieldreturn [b] anything; it's ignored, just like in
+    #   begin-ensure syntax
+    # @return [Eff<a>] an Eff with the original type
+    def ensuring(&block)
+      Eff.new do
+        begin
+          self.run!
+        ensure
+          block.call
+        end
+      end
+    end
+
+    # Wrap this Eff inside a bigger Eff with a begin-rescue block
+    #
+    # @param type [Class] the type of error to rescue
+    # @yieldparam [e] the exception you're rescuing; use a block/Proc
+    #   instead of a lambda if you don't care and don't want
+    #   an ArgumentError for a mismatching argument count.
+    # @yieldreturn [a] post-rescue value; please use the same type as
+    #   the original Eff would return
+    # @return [Eff<a>] an Eff with the original type
+    def rescuing(type: StandardError, &block)
+      Eff.new do
+        begin
+          self.run!
+        rescue type => e
+          block.call(e)
         end
       end
     end
