@@ -46,15 +46,31 @@ module HomebrewAutomation::Effects
       [x, s]
     end
 
+    def self._block_not_expected_msg
+      "Block not expected here. Did you forget to call #bind, #apply, #map, or something?"
+    end
+
     def self.get
+      if block_given?
+        raise StandardError.new self._block_not_expected_msg
+      end
       State.new do |s|
         [s, s]
       end
     end
 
     def self.put(x)
+      if block_given?
+        raise StandardError.new self._block_not_expected_msg
+      end
       State.new do |_|
         [nil, x]
+      end
+    end
+
+    def self.modify(&on_state)
+      State.new do |s|
+        [nil, on_state.call(s)]
       end
     end
 
