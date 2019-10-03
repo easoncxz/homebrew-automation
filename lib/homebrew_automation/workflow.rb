@@ -36,21 +36,24 @@ module HomebrewAutomation
         keep_homebrew_tmp: false)
       mac_os.identify_version.bind! do |os_name|
       tap.with_git_clone do
-        tap.on_formula(formula_name) do |formula|
+        tap.on_formula formula_name do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)
+        end.bind! do
+          tap.git_commit_am "Throwaway commit; just for building bottles"
+        end.map! do
+          # TODO: reify to change the above `#map!` to `#bind!`
+
+          local_tap_url = file.realpath('.')
+          bottle = bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
+          bottle.build
+
+          # Bintray auto-creates Versions on file-upload.
+          # Re-creating an existing Version results in a 409.
+          #bversion.create!
+          bversion.upload_file!(bottle.filename, bottle.content)
+
+          bottle
         end
-        tap.git_commit_am "Throwaway commit; just for building bottles"
-
-        local_tap_url = file.realpath('.')
-        bottle = bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
-        bottle.build
-
-        # Bintray auto-creates Versions on file-upload.
-        # Re-creating an existing Version results in a 409.
-        #bversion.create!
-        bversion.upload_file!(bottle.filename, bottle.content)
-
-        bottle
       end
       end
     end
@@ -69,7 +72,7 @@ module HomebrewAutomation
     # @return [Formula]
     def gather_and_publish_bottles(sdist, tap, formula_name, bversion)
       tap.with_git_clone do
-        tap.on_formula(formula_name) do |formula|
+        tap.on_formula formula_name do |formula|
           bottles = bversion.gather_bottles
           bottles.reduce(
             formula.
@@ -78,10 +81,13 @@ module HomebrewAutomation
           ) do |f, (os, checksum)|
             f.put_bottle(os, checksum)
           end
+        end.bind! do
+          tap.git_config
+        end.bind! do
+          tap.git_commit_am "Add bottles for #{formula_name}@#{bversion.version_name}"
+        end.bind! do
+          tap.git_push
         end
-        tap.git_config
-        tap.git_commit_am "Add bottles for #{formula_name}@#{bversion.version_name}"
-        tap.git_push
       end
     end
 

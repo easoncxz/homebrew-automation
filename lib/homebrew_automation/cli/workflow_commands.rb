@@ -45,7 +45,12 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
     Tap repo on Github via a Github OAuth token via `tap_token`.
   HERE_HERE
   def gather_and_publish
-    workflow.gather_and_publish_bottles(sdist, tap, formula_name, bintray_version)
+    workflow.gather_and_publish_bottles(
+      sdist,
+      tap,
+      formula_name,
+      bintray_version
+    ).run!
   end
 
   private

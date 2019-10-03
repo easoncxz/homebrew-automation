@@ -47,7 +47,10 @@ module HomebrewAutomation
     # @return [Eff<a>] doing that thing inside the cloned directory
     def with_git_clone(&block)
       _git_clone.map! do
-        Dir.chdir(@repo, &block)  # TODO: reify
+        # TODO: reify to change `#map!` into `#bind!` and to remove `#run!` call
+        Dir.chdir @repo do |basename|
+          block.call(basename).run!
+        end
       end.ensuring do
         _remove_git_submodule unless @keep_submodule
       end
@@ -64,21 +67,24 @@ module HomebrewAutomation
     #     directory inside the Tap repo's directory, excluding the +.rb+ suffix.
     # @yield [Formula]
     # @yieldreturn [Formula]
-    # @return [Formula] as returned from the block,
-    #     assuming it obediantly returns a {Formula}.
+    # @return [Eff<Formula>] an effect that performs such change and returns the
+    #   resulting Formula
     def on_formula(formula, &block)
-      name = "#{formula}.rb"  # DOC
-      block ||= ->(n) { n }
-      Dir.chdir 'Formula' do  # DOC
-        File.open name, 'r' do |old_file|
-          File.open "#{name}.new", 'w' do |new_file|
-            new_file.write(
-              block.
-                call(Formula.parse_string(old_file.read)).
-                to_s)
+      # TODO: reify?
+      Eff.new do
+        name = "#{formula}.rb"  # DOC
+        block ||= ->(n) { n }
+        Dir.chdir 'Formula' do  # DOC
+          File.open name, 'r' do |old_file|
+            File.open "#{name}.new", 'w' do |new_file|
+              new_file.write(
+                block.
+                  call(Formula.parse_string(old_file.read)).
+                  to_s)
+            end
           end
+          File.rename "#{name}.new", name
         end
-        File.rename "#{name}.new", name
       end
     end
 
@@ -89,28 +95,36 @@ module HomebrewAutomation
     # - TRAVIS_GIT_USER_EMAIL
     #
     # If either env var is not set, do nothing.
+    #
+    # @return [Eff]
     def git_config
-      name = ENV['TRAVIS_GIT_USER_NAME']
-      email = ENV['TRAVIS_GIT_USER_EMAIL']
-      if name && email
-        system 'git', 'config', '--global', 'user.name', name
-        system 'git', 'config', '--global', 'user.email', email
+      Eff.new do
+        name = ENV['TRAVIS_GIT_USER_NAME']
+        email = ENV['TRAVIS_GIT_USER_EMAIL']
+        if name && email
+          system 'git', 'config', '--global', 'user.name', name
+          system 'git', 'config', '--global', 'user.email', email
+        end
       end
     end
 
     # Just +git commit -am "$msg"+
     #
     # @param msg [String] Git commit message
-    # @raise [StandardError]
+    # @return [Eff<TrueClass, err: StandardError]
     def git_commit_am(msg)
-      complain! unless system "git", "commit", "-am", msg
+      Eff.new do
+        complain! unless system "git", "commit", "-am", msg
+      end
     end
 
     # Just +git push+
     #
-    # @raise [StandardError]
+    # @return [Eff<TrueClass, err: StandardError>]
     def git_push
-      complain! unless system "git", "push"
+      Eff.new do
+        complain! unless system "git", "push"
+      end
     end
 
     # @return [Eff<NilClass>]
