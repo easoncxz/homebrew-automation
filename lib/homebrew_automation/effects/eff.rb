@@ -3,10 +3,8 @@ module HomebrewAutomation::Effects
 
   # A first-class Effect abstraction
   #
-  # Reify blocks of impure code into composable
-  # first-class data structures. Inspired by Haskell and Scala's
-  # ZIO. This class should be well-suited to be factored out into
-  # its own little library.
+  # Reify blocks of impure code into composable first-class data
+  # structures. Inspired by Haskell's Monad and Scala's ZIO.
   #
   # Since Ruby is dynamically typed, I'm not going to fuss too much
   # about the specific type parametres of this type, but it'd be
