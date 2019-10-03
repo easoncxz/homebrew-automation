@@ -370,4 +370,36 @@ describe 'HomebrewAutomation::Effects' do
 
   end
 
+  describe 'State' do
+
+    let(:state) { HomebrewAutomation::Effects::State }
+
+    it 'implements ::pure and #run! differently from other Effects, needing an extra param and return value' do
+      expect(state.pure('value').run!('state')).to eq ['value', 'state']
+    end
+
+    it 'implements ::get' do
+      expect(state.get.run!('state')).to eq ['state', 'state']
+    end
+
+    it 'implements ::put' do
+      expect(state.put('new').run!('old')).to eq [nil, 'new']
+    end
+
+    it 'threads the state through changes in the chain of actions' do
+      something = Hash.new
+      m =
+        state.pure(something).bind do |h|
+          state.get.bind do |counter|
+            state.put(counter + 1).bind do
+              state.pure(h.merge(foo: 'foobar'))
+            end
+          end
+        end
+      expect(something).to eq Hash.new
+      expect(m.run!(0)).to eq [{foo: 'foobar'}, 1]
+    end
+
+  end
+
 end
