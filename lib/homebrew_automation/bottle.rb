@@ -1,10 +1,14 @@
 
 require 'json'
 
+require_relative './effects.rb'
+
 module HomebrewAutomation
 
   # A representation of a binary build of a Homebrew package
   class Bottle
+
+    Eff = HomebrewAutomation::Effects::Eff
 
     # @param tap_url [String] Something suitable for +git clone+, e.g. +git@github.com:easoncxz/homebrew-tap.git+ or +/some/path/to/my-git-repo+
     # @param formula_name [String] As known by Homebrew
@@ -16,28 +20,39 @@ module HomebrewAutomation
         tap_url,
         formula_name,
         os_name,
+        tap_name: 'easoncxz/tmp-tap',
         filename: nil,
         content: nil,
         keep_tmp: false)
       @tap_url = tap_url
       @formula_name = formula_name
       @os_name = os_name
+      @tap_name = tap_name
       @filename = filename
       @minus_minus = nil  # https://github.com/Homebrew/brew/pull/4612
       @content = content
       @keep_tmp = keep_tmp
     end
 
-    # Takes ages to run, just like if done manually
+    # Would take ages to run, just like if done manually
+    #
+    # Unless you're already run +brew install --build-bottle+ on that Formula
+    # on your system before already.
     #
     # @raise [StandardError]
-    # @return [nil]
+    # @return [Eff<NilClass>]
     def build
-      complain unless system 'brew', 'tap', tmp_tap_name, @tap_url
-      maybe_keep_tmp = @keep_tmp ? ['--keep-tmp'] : []
-      install_cmd = ['brew', 'install', '--verbose'] + maybe_keep_tmp + ['--build-bottle', fully_qualified_formula_name]
-      complain unless system(*install_cmd)
-      complain unless system 'brew', 'bottle', '--verbose', '--json', '--no-rebuild', fully_qualified_formula_name
+      Eff.new do
+        complain unless system 'brew', 'tap', @tap_name, @tap_url
+        install_cmd =
+          ['brew', 'install', '--verbose'] +
+          if @keep_tmp then ['--keep-tmp'] else [] end +
+          ['--build-bottle', fully_qualified_formula_name]
+        complain unless system(*install_cmd)
+        complain unless system(
+          'brew', 'bottle', '--verbose', '--json', '--no-rebuild',
+          fully_qualified_formula_name)
+      end
     end
 
     # Read and analyse metadata JSON file
@@ -50,7 +65,7 @@ module HomebrewAutomation
       end
       json = JSON.parse(File.read(json_filename))
       focus = json || complain
-      focus = focus[json.keys.first] || complain
+      focus = focus[fully_qualified_formula_name] || complain
       focus = focus['bottle'] || complain
       focus = focus['tags'] || complain
       focus = focus[@os_name] || complain
@@ -86,13 +101,8 @@ module HomebrewAutomation
 
     private
 
-    # A name for the temporary tap; doesn't really matter what this is.
-    def tmp_tap_name
-      'easoncxz/tmp-tap'
-    end
-
     def fully_qualified_formula_name
-      tmp_tap_name + '/' + @formula_name
+      @tap_name + '/' + @formula_name
     end
 
     def complain

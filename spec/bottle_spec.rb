@@ -9,8 +9,9 @@ describe "HomebrewAutomation::Bottle" do
   it 'can figure out the filenames from the one JSON file in the CWD' do
     bottle = HomebrewAutomation::Bottle.new(
       "somewhere/homebrew-tap",
-      "some-package-name",
-      "high_sierra"   # should match `spec/data/sample-bottle.json`
+      "hack-assembler",               # should match `spec/data/sample.bottle.json`
+      "high_sierra",                  # should match `spec/data/sample.bottle.json`
+      tap_name: 'easoncxz/local-tap'  # should match `spec/data/sample.bottle.json`
     )
     Dir.chdir 'spec/data' do
       bottle.locate_tarball

@@ -2,6 +2,7 @@
 require_relative './mac_os.rb'
 require_relative './bintray.rb'
 require_relative './source_dist.rb'
+require_relative './effects.rb'
 
 module HomebrewAutomation
 
@@ -9,6 +10,8 @@ module HomebrewAutomation
   #
   # Each method in this class probably makes sense to be exposed as a CLI command.
   class Workflow
+
+    Eff = HomebrewAutomation::Effects::Eff
 
     # Build and upload a bottle.
     #
@@ -40,19 +43,19 @@ module HomebrewAutomation
           formula.put_sdist(sdist.url, sdist.sha256)
         end.bind! do
           tap.git_commit_am "Throwaway commit; just for building bottles"
-        end.map! do
-          # TODO: reify to change the above `#map!` to `#bind!`
-
-          local_tap_url = file.realpath('.')
+        end.bind! do
+          local_tap_url = file.realpath('.')  # TODO: wrap call to File
           bottle = bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
-          bottle.build
+          bottle.build.map! do
+            # TODO: reify Bintray::Version effects
 
-          # Bintray auto-creates Versions on file-upload.
-          # Re-creating an existing Version results in a 409.
-          #bversion.create!
-          bversion.upload_file!(bottle.filename, bottle.content)
+            # Bintray auto-creates Versions on file-upload.
+            # Re-creating an existing Version results in a 409.
+            #bversion.create!
+            bversion.upload_file!(bottle.filename, bottle.content)
 
-          bottle
+            bottle
+          end
         end
       end
       end
