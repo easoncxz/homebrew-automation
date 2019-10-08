@@ -2,112 +2,111 @@
 require 'json'
 
 require_relative './effects.rb'
+require_relative './effect_providers.rb'
 
 module HomebrewAutomation
 
-  # A representation of a binary build of a Homebrew package
+  # Metadata for building a Bottle for a Homebrew package
   class Bottle
 
     Eff = HomebrewAutomation::Effects::Eff
 
+    EP = HomebrewAutomation::EffectProviders
+
+    class BottleError < StandardError
+    end
+
     # @param tap_url [String] Something suitable for +git clone+, e.g. +git@github.com:easoncxz/homebrew-tap.git+ or +/some/path/to/my-git-repo+
     # @param formula_name [String] As known by Homebrew
     # @param os_name [String] As known by Homebrew, e.g. +el_capitan+
-    # @param filename [String] ???
-    # @param content [String] ???
+    # @param tap_name [String] For use with +brew tap+
     # @param keep_tmp [Boolean] pass +--keep-tmp+ to +brew+
     def initialize(
         tap_url,
         formula_name,
         os_name,
         tap_name: 'easoncxz/tmp-tap',
-        filename: nil,
-        content: nil,
-        keep_tmp: false)
+        keep_tmp: false,
+        brew: EP::Brew,
+        bottle_finder: Bottle,
+        file: EP::File)
       @tap_url = tap_url
       @formula_name = formula_name
       @os_name = os_name
       @tap_name = tap_name
-      @filename = filename
-      @minus_minus = nil  # https://github.com/Homebrew/brew/pull/4612
-      @content = content
       @keep_tmp = keep_tmp
+      @brew = brew
+      @bottle_finder = bottle_finder
+      @file = file
     end
 
-    # Would take ages to run, just like if done manually
+    # Build the bottle and get a file suitable for Bintray upload
     #
-    # Unless you're already run +brew install --build-bottle+ on that Formula
-    # on your system before already.
+    # Unless you've already run +brew install --build-bottle+ on that Formula
+    # on your system before, the returned effect would take ages to run (looking
+    # at about 30-60 minutes).
     #
-    # @raise [StandardError]
-    # @return [Eff<NilClass>]
+    # @return [Eff<Tuple<String, String>, error: BottleError>] +[filename, contents]+
     def build
-      Eff.new do
-        complain unless system 'brew', 'tap', @tap_name, @tap_url
-        install_cmd =
-          ['brew', 'install', '--verbose'] +
-          if @keep_tmp then ['--keep-tmp'] else [] end +
-          ['--build-bottle', fully_qualified_formula_name]
-        complain unless system(*install_cmd)
-        complain unless system(
-          'brew', 'bottle', '--verbose', '--json', '--no-rebuild',
+      call_brew.bind! do
+        @bottle_finder.read_json
+      end.map! do |json_str|
+        parse_for_tarball_path(json_str)
+      end.bind! do |(minus_minus, filename)|
+        @file.read(minus_minus).bind! do |contents|
+          Eff.pure([filename, contents])
+        end
+      end
+    end
+
+    private
+
+    # @return [Eff<NilClass>]
+    def call_brew
+      @brew.tap(@tap_name, @tap_url).bind! do
+        @brew.install(
+          %w[--verbose --build-bottle] + if @keep_tmp then %w[--keep-tmp] else [] end,
+          fully_qualified_formula_name)
+      end.bind! do
+        @brew.bottle(
+          %w[--verbose --json --no-rebuild],
           fully_qualified_formula_name)
       end
     end
 
-    # Read and analyse metadata JSON file
-    # @return [Array<(String, String)>] {#minus_minus} and {#filename}
-    def locate_tarball
-      json_filename = Dir['*.bottle.json'].first
-      unless json_filename
-        build
-        return locate_tarball
+    # pure-ish; raises exception
+    #
+    # @return [Tuple<String, String>] +[minus_minus, filename]+
+    def parse_for_tarball_path(json_str)
+      begin
+        focus = JSON.parse(json_str)
+        [fully_qualified_formula_name, 'bottle', 'tags', @os_name].each do |key|
+          focus = focus[key]
+          if focus.nil?
+            raise BottleError.new "unexpected JSON structure, couldn't find key: #{key}"
+          end
+        end
+        # https://github.com/Homebrew/brew/pull/4612
+        minus_minus, filename = focus['local_filename'], focus['filename']
+        if minus_minus.nil? || filename.nil?
+          raise BottleError.new "unexpected JSON structure, couldn't find both `local_filename` and `filename` keys: #{minus_minus.inspect}, #{filename.inspect}"
+        end
+        [minus_minus, filename]
+      rescue JSON::ParserError => e
+        raise BottleError.new "error parsing JSON: #{e}"
       end
-      json = JSON.parse(File.read(json_filename))
-      focus = json || complain
-      focus = focus[fully_qualified_formula_name] || complain
-      focus = focus['bottle'] || complain
-      focus = focus['tags'] || complain
-      focus = focus[@os_name] || complain
-      @minus_minus, @filename = focus['local_filename'], focus['filename']
     end
-
-    # The +brew bottle+ original output filename
-    #
-    # See https://github.com/Homebrew/brew/pull/4612 for details.
-    #
-    # @return [String]
-    def minus_minus
-      @minus_minus || locate_tarball.first
-    end
-
-    # Filename of a Bottle tarball suitable for writing into a Formula file
-    #
-    # @return [String]
-    def filename
-      @filename || locate_tarball.last
-    end
-
-    # @return [String] {#content}
-    def load_tarball_from_disk
-      File.rename minus_minus, filename
-      @content = File.read filename
-    end
-
-    # @return [String] bytes of the tarball of this Bottle
-    def content
-      @content || load_tarball_from_disk
-    end
-
-    private
 
     def fully_qualified_formula_name
       @tap_name + '/' + @formula_name
     end
 
-    def complain
-      puts "HEY! Something has gone wrong and I need to complain. Stacktrace follows:"
-      puts caller
+    # @return [Eff<String>]
+    def self.read_json
+      Eff.new do
+        json_filename = Dir['*.bottle.json'].first
+        File.read(json_filename)
+      end
     end
 
   end

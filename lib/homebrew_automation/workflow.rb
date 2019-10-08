@@ -46,13 +46,13 @@ module HomebrewAutomation
         end.bind! do
           local_tap_url = file.realpath('.')  # TODO: wrap call to File
           bottle = bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
-          bottle.build.map! do
+          bottle.build.bind! do |(filename, contents)|
             # TODO: reify Bintray::Version effects
 
             # Bintray auto-creates Versions on file-upload.
             # Re-creating an existing Version results in a 409.
             #bversion.create!
-            bversion.upload_file!(bottle.filename, bottle.content)
+            bversion.upload_file!(filename, contents)
 
             bottle
           end
