@@ -26,8 +26,7 @@ module HomebrewAutomation
         tap_name: 'easoncxz/tmp-tap',
         keep_tmp: false,
         brew: Brew,
-        bottle_finder: Bottle,
-        file: File)
+        bottle_finder: Bottle)
       @tap_url = tap_url
       @formula_name = formula_name
       @os_name = os_name
@@ -35,7 +34,6 @@ module HomebrewAutomation
       @keep_tmp = keep_tmp
       @brew = brew
       @bottle_finder = bottle_finder
-      @file = file
     end
 
     # Build the bottle and get a file suitable for Bintray upload
@@ -50,7 +48,7 @@ module HomebrewAutomation
         call_brew!
         json_str = @bottle_finder.read_json!
         (minus_minus, filename) = parse_for_tarball_path(json_str)
-        contents = @file.read minus_minus
+        contents = @bottle_finder.read_tarball! minus_minus
         [filename, contents]
       end
     end
@@ -95,10 +93,13 @@ module HomebrewAutomation
       @tap_name + '/' + @formula_name
     end
 
-    # @return [Eff<String>]
     def self.read_json!
       json_filename = Dir['*.bottle.json'].first
       File.read(json_filename)
+    end
+
+    def self.read_tarball!(minus_minus)
+      File.read(minus_minus)
     end
 
   end
