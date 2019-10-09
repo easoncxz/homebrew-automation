@@ -51,6 +51,15 @@ module HomebrewAutomation
       [filename, contents]
     end
 
+    def self.read_json!
+      json_filename = Dir['*.bottle.json'].first
+      File.read(json_filename)
+    end
+
+    def self.read_tarball!(minus_minus)
+      File.read(minus_minus)
+    end
+
     private
 
     # tap, install, and bottle
@@ -89,15 +98,6 @@ module HomebrewAutomation
 
     def fully_qualified_formula_name
       @tap_name + '/' + @formula_name
-    end
-
-    def self.read_json!
-      json_filename = Dir['*.bottle.json'].first
-      File.read(json_filename)
-    end
-
-    def self.read_tarball!(minus_minus)
-      File.read(minus_minus)
     end
 
   end
