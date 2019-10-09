@@ -1,6 +1,5 @@
 
 require 'fileutils'
-require 'pry'
 
 module HomebrewAutomation
 
