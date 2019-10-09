@@ -1,4 +1,6 @@
 
+require 'fileutils'
+
 require 'homebrew_automation/git.rb'
 
 describe HomebrewAutomation::Git do

@@ -1,4 +1,5 @@
 
+require 'fileutils'
 require 'tmpdir'
 
 require 'homebrew_automation/tap.rb'
