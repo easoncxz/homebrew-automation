@@ -33,7 +33,7 @@ module HomebrewAutomation
         bottle: Bottle,
         keep_tap_repo: false,
         keep_homebrew_tmp: false)
-      os_name = mac_os.identify_version.run!
+      os_name = mac_os.identify_version!
       git.with_clone!(tap.url, tap.repo, keep_dir: keep_tap_repo) do |cloned_dir|
         tap.on_formula! formula_name do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)

@@ -1,6 +1,4 @@
 
-require_relative './effects.rb'
-
 module HomebrewAutomation
 
   # Inspect version of the macOS we're running on
@@ -11,20 +9,18 @@ module HomebrewAutomation
     # Return a macOS version name in a convention recognised by Homebrew, in
     # particular by the Formula/Bottle DSL.
     #
-    # @return [Eff<String | NilClass>]
-    def self.identify_version
-      Effects::Eff.new do
+    # @return [String | NilClass]
+    def self.identify_version!
+      version =
         begin
-          `sw_vers -productVersion`
+          `sw_vers -productVersion`.chomp
         rescue Errno::ENOENT    # if we're not on a Mac
           nil
         end
-      end.map! do |version|
-        mac_to_homebrew.
-          select { |pattern, _| pattern === version }.
-          map { |_, description| description }.
-          first
-      end
+      mac_to_homebrew.
+        select { |pattern, _| pattern === version }.
+        map { |_, description| description }.
+        first
     end
 
     # Lookup table of numeric version patterns to Homebrew-recognised strings
