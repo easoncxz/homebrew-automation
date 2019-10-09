@@ -1,7 +1,5 @@
 
 require 'homebrew_automation/bottle.rb'
-require 'homebrew_automation/effects.rb'
-require 'homebrew_automation/effect_providers/file.rb'
 
 describe "HomebrewAutomation::Bottle" do
 
@@ -17,8 +15,6 @@ describe "HomebrewAutomation::Bottle" do
 
   let(:fake_brew) { double }
   let(:fake_bottle_finder) { double }
-
-  Eff = HomebrewAutomation::Effects::Eff
 
   it 'can figure out the filenames from the one JSON file in the CWD' do
     bottle = HomebrewAutomation::Bottle.new(

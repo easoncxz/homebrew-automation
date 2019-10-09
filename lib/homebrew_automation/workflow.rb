@@ -1,8 +1,6 @@
 
 require_relative './mac_os.rb'
-require_relative './bintray.rb'
-require_relative './source_dist.rb'
-require_relative './effects.rb'
+require_relative './bottle.rb'
 
 module HomebrewAutomation
 
@@ -10,8 +8,6 @@ module HomebrewAutomation
   #
   # Each method in this class probably makes sense to be exposed as a CLI command.
   class Workflow
-
-    Eff = HomebrewAutomation::Effects::Eff
 
     # Build and upload a bottle.
     #
@@ -27,7 +23,7 @@ module HomebrewAutomation
     # @param keep_homebrew_tmp [Boolean] keep the HOMEBREW_TEMP directory
     #
     # @return [Bottle]
-    def build_and_upload_bottle(
+    def build_and_upload_bottle!(
         sdist,
         tap,
         git,
@@ -37,7 +33,7 @@ module HomebrewAutomation
         bottle: Bottle,
         keep_tap_repo: false,
         keep_homebrew_tmp: false)
-      mac_os.identify_version.map! do |os_name|
+      os_name = mac_os.identify_version.run!
       git.with_clone!(tap.url, tap.repo, keep_dir: keep_tap_repo) do |cloned_dir|
         tap.on_formula! formula_name do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)
@@ -58,7 +54,6 @@ module HomebrewAutomation
 
         bot
       end
-      end
     end
 
     # Gather and publish bottles.
@@ -72,25 +67,24 @@ module HomebrewAutomation
     # @param tap [Tap]
     # @param formula_name [String] the name of the formula in the Tap
     # @param bversion [Bintray::Version]
-    # @return [Eff<Formula>]
-    def gather_and_publish_bottles(sdist, tap, formula_name, bversion)
-      Eff.new do
-        git.with_clone!(tap.url, tap.repo) do
-          tap.on_formula formula_name do |formula|
-            bottles = bversion.gather_bottles
-            bottles.reduce(
-              formula.
-              put_sdist(sdist.url, sdist.sha256).
-              rm_all_bottles
-            ) do |f, (os, checksum)|
-              f.put_bottle(os, checksum)
-            end
-          end.run!
-          git.config!
-          git.commit_am! "Add bottles for #{formula_name}@#{bversion.version_name}"
-          git.push!
+    # @return [NilClass]
+    def gather_and_publish_bottles!(sdist, tap, formula_name, bversion)
+      git.with_clone!(tap.url, tap.repo) do
+        tap.on_formula! formula_name do |formula|
+          bottles = bversion.gather_bottles
+          bottles.reduce(
+            formula.
+            put_sdist(sdist.url, sdist.sha256).
+            rm_all_bottles
+          ) do |f, (os, checksum)|
+            f.put_bottle(os, checksum)
+          end
         end
+        git.config!
+        git.commit_am! "Add bottles for #{formula_name}@#{bversion.version_name}"
+        git.push!
       end
+      nil
     end
 
   end

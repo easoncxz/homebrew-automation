@@ -29,14 +29,14 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
   option :keep_tap_repo, :type => :boolean
   option :keep_brew_tmp, :type => :boolean
   def build_and_upload
-    workflow.build_and_upload_bottle(
+    workflow.build_and_upload_bottle!(
       sdist,
       tap,
       git,
       formula_name,
       bintray_version,
       keep_tap_repo: options[:keep_tap_repo],
-      keep_homebrew_tmp: options[:keep_brew_tmp]).run!
+      keep_homebrew_tmp: options[:keep_brew_tmp])
   end
 
   desc 'gather-and-publish', 'Make the Tap aware of new Bottles'
@@ -47,12 +47,11 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
     Tap repo on Github via a Github OAuth token via `tap_token`.
   HERE_HERE
   def gather_and_publish
-    workflow.gather_and_publish_bottles(
+    workflow.gather_and_publish_bottles!(
       sdist,
       tap,
       formula_name,
-      bintray_version
-    ).run!
+      bintray_version)
   end
 
   private
