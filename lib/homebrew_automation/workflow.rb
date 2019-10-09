@@ -49,7 +49,11 @@ module HomebrewAutomation
           # Bintray auto-creates Versions on file-upload.
           # Re-creating an existing Version results in a 409.
           #bversion.create!
-          bversion.upload_file!(filename, contents)
+          begin
+            bversion.upload_file!(filename, contents)
+          rescue Bintray::Version::FileAlreadyExists
+            puts "A file with the same name as the one you're uploading already exits on Bintray"
+          end
         end
         bot
       end
