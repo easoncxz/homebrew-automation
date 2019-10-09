@@ -1,20 +1,18 @@
 
 require 'json'
 
+require_relative './brew.rb'
 require_relative './effects.rb'
-require_relative './effect_providers.rb'
 
 module HomebrewAutomation
 
   # Metadata for building a Bottle for a Homebrew package
   class Bottle
 
-    Eff = HomebrewAutomation::Effects::Eff
-
-    EP = HomebrewAutomation::EffectProviders
-
-    class BottleError < StandardError
+    class Error < StandardError
     end
+
+    Eff = HomebrewAutomation::Effects::Eff
 
     # @param tap_url [String] Something suitable for +git clone+, e.g. +git@github.com:easoncxz/homebrew-tap.git+ or +/some/path/to/my-git-repo+
     # @param formula_name [String] As known by Homebrew
@@ -27,9 +25,9 @@ module HomebrewAutomation
         os_name,
         tap_name: 'easoncxz/tmp-tap',
         keep_tmp: false,
-        brew: EP::Brew,
+        brew: Brew,
         bottle_finder: Bottle,
-        file: EP::File)
+        file: File)
       @tap_url = tap_url
       @formula_name = formula_name
       @os_name = os_name
@@ -48,30 +46,26 @@ module HomebrewAutomation
     #
     # @return [Eff<Tuple<String, String>, error: BottleError>] +[filename, contents]+
     def build
-      call_brew.bind! do
-        @bottle_finder.read_json
-      end.map! do |json_str|
-        parse_for_tarball_path(json_str)
-      end.bind! do |(minus_minus, filename)|
-        @file.read(minus_minus).bind! do |contents|
-          Eff.pure([filename, contents])
-        end
+      Eff.new do
+        call_brew!
+        json_str = @bottle_finder.read_json!
+        (minus_minus, filename) = parse_for_tarball_path(json_str)
+        contents = @file.read minus_minus
+        [filename, contents]
       end
     end
 
     private
 
-    # @return [Eff<NilClass>]
-    def call_brew
-      @brew.tap(@tap_name, @tap_url).bind! do
-        @brew.install(
-          %w[--verbose --build-bottle] + if @keep_tmp then %w[--keep-tmp] else [] end,
-          fully_qualified_formula_name)
-      end.bind! do
-        @brew.bottle(
-          %w[--verbose --json --no-rebuild],
-          fully_qualified_formula_name)
-      end
+    # tap, install, and bottle
+    def call_brew!
+      @brew.tap!(@tap_name, @tap_url)
+      @brew.install!(
+        %w[--verbose --build-bottle] + if @keep_tmp then %w[--keep-tmp] else [] end,
+        fully_qualified_formula_name)
+      @brew.bottle!(
+        %w[--verbose --json --no-rebuild],
+        fully_qualified_formula_name)
     end
 
     # pure-ish; raises exception
@@ -102,11 +96,9 @@ module HomebrewAutomation
     end
 
     # @return [Eff<String>]
-    def self.read_json
-      Eff.new do
-        json_filename = Dir['*.bottle.json'].first
-        File.read(json_filename)
-      end
+    def self.read_json!
+      json_filename = Dir['*.bottle.json'].first
+      File.read(json_filename)
     end
 
   end

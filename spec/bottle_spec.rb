@@ -14,7 +14,6 @@ describe "HomebrewAutomation::Bottle" do
   let(:fake_brew) { double }
 
   Eff = HomebrewAutomation::Effects::Eff
-  EP = HomebrewAutomation::EffectProviders
 
   it 'can figure out the filenames from the one JSON file in the CWD' do
     bottle = HomebrewAutomation::Bottle.new(
@@ -25,13 +24,11 @@ describe "HomebrewAutomation::Bottle" do
       brew: fake_brew
     )
 
-    [:tap, :install, :bottle].each do |cmd|
-      expect(fake_brew).to receive(cmd).and_return(Eff.pure(nil)).ordered
+    [:tap!, :install!, :bottle!].each do |cmd|
+      expect(fake_brew).to receive(cmd).ordered
     end
 
     Dir.chdir 'spec/data/bottle' do
-      expect(EP::File.read(bottle_json_filename).run!).to(
-        eq(File.read bottle_json_filename))
       (filename, contents) = bottle.build.run!
       expect(filename).to eq(bottle_filename)
       expect(contents).to match String
