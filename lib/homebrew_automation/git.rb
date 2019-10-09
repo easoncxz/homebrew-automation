@@ -18,6 +18,8 @@ module HomebrewAutomation
       # - TRAVIS_GIT_USER_EMAIL
       #
       # If either env var is not set, do nothing.
+      #
+      # @return [NilClass]
       def config!
         name = ENV['TRAVIS_GIT_USER_NAME']
         email = ENV['TRAVIS_GIT_USER_EMAIL']
@@ -29,7 +31,9 @@ module HomebrewAutomation
 
       # Just +git clone+ the given URL
       #
+      # @param url [String] git-friendly URL; could be filesystem path
       # @param dir [String] optionally specify target dir name
+      # @return [NilClass]
       def clone!(url, dir: nil)
         if dir
           raise_unless 'git', 'clone', url, dir
@@ -38,8 +42,16 @@ module HomebrewAutomation
         end
       end
 
-      # Like {#clone!}, but allows you to do something inside
+      # Like {#clone!} , but allows you to do something inside
       # the newly cloned directory, pushd-style.
+      #
+      # @see clone!
+      # @param url [String]
+      # @param dir [String]
+      # @param keep_dir [Boolean]
+      # @yieldparam dir [String] name of freshly cloned dir
+      # @yieldreturn [a] anything
+      # @return [a]
       def with_clone!(url, dir, keep_dir: false, &block)
         begin
           clone! url, dir: dir
@@ -48,6 +60,7 @@ module HomebrewAutomation
           else
             puts "Strange, you're calling Git#with_clone! without a block."
           end
+          nil
         ensure
           FileUtils.remove_dir(dir) unless keep_dir
         end
@@ -56,11 +69,14 @@ module HomebrewAutomation
       # +git commit --allow-empty -am "$msg"+
       #
       # @param msg [String] Git commit message
+      # @return [NilClass]
       def commit_am!(msg)
         raise_unless 'git', 'commit', '--allow-empty', '-am', msg
       end
 
       # Just +git push+
+      #
+      # @return [NilClass]
       def push!
         raise_unless 'git', 'push'
       end

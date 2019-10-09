@@ -53,7 +53,6 @@ module HomebrewAutomation
     # @return [Eff<Formula>] an effect that performs such change and returns the
     #   resulting Formula
     def on_formula(formula, &block)
-      # TODO: reify?
       Eff.new do
         name = "#{formula}.rb"  # DOC
         block ||= ->(n) { n }
