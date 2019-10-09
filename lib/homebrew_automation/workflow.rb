@@ -41,7 +41,7 @@ module HomebrewAutomation
         keep_homebrew_tmp: false)
       mac_os.identify_version.map! do |os_name|
       git.with_clone!(tap.url, tap.repo, keep_dir: keep_tap_repo) do
-        tap.on_formula formula_name do |formula|
+        tap.on_formula! formula_name do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)
         end
         git.commit_am! "Throwaway commit; just for building bottles"

@@ -43,9 +43,9 @@ describe "HomebrewAutomation::Tap" do
       expect(Dir.exists? 'Formula').to be true
       random_url = "https://google.com/?q=#{rand 1000..9999}"
       expect(File.read 'Formula/hack-assembler.rb').not_to include(random_url)
-      tap.on_formula 'hack-assembler' do |f|
+      tap.on_formula! 'hack-assembler' do |f|
         f.put_sdist random_url, "sha256abcd"
-      end.run!
+      end
       expect(File.read 'Formula/hack-assembler.rb').to include(random_url)
     end
   end

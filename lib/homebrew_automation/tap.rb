@@ -1,13 +1,10 @@
 
 require_relative "formula.rb"
-require_relative "effects/eff.rb"
 
 module HomebrewAutomation
 
   # A representation of a Github repo that acts as a Homebrew Tap.
   class Tap
-
-    Eff = HomebrewAutomation::Effects::Eff
 
     # See {#user}, {#repo}, {#token}.
     def initialize(user, repo, token)
@@ -41,32 +38,29 @@ module HomebrewAutomation
 
     # Overwrite the specified Formula file, in-place, on-disk
     #
-    # Haskell-y type: <tt>(String, &Block (Formula -> Formula)) -> Formula</tt>
+    # A directory named +Formula+ is assumed to be on +Dir.pwd+.
     #
     # If no block is passed, then this tries to find the formula file, but then
-    # does nothing.
+    # makes no changes to that Formula.
     #
     # @param formula [String] Part of the name to the file within the +Formula+
     #     directory inside the Tap repo's directory, excluding the +.rb+ suffix.
-    # @yield [Formula]
-    # @yieldreturn [Formula]
-    # @return [Eff<Formula>] an effect that performs such change and returns the
-    #   resulting Formula
-    def on_formula(formula, &block)
-      Eff.new do
-        name = "#{formula}.rb"  # DOC
-        block ||= ->(n) { n }
-        Dir.chdir 'Formula' do  # DOC
-          File.open name, 'r' do |old_file|
-            File.open "#{name}.new", 'w' do |new_file|
-              new_file.write(
-                block.
-                  call(Formula.parse_string(old_file.read)).
-                  to_s)
-            end
+    # @yieldparam formula [Formula] existing Formula
+    # @yieldreturn [Formula] after your modifications
+    # @return [Formula] new Formula
+    def on_formula!(formula, &block)
+      name = "#{formula}.rb"
+      block ||= ->(n) { n }
+      Dir.chdir 'Formula' do
+        File.open name, 'r' do |old_file|
+          File.open "#{name}.new", 'w' do |new_file|
+            new_file.write(
+              block.
+                call(Formula.parse_string(old_file.read)).
+                to_s)
           end
-          File.rename "#{name}.new", name
         end
+        File.rename "#{name}.new", name
       end
     end
 
