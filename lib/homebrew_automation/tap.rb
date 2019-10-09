@@ -9,27 +9,23 @@ module HomebrewAutomation
 
     Eff = HomebrewAutomation::Effects::Eff
 
-    # Assign params to attributes.
-    #
     # See {#user}, {#repo}, {#token}.
-    #
-    # @param keep_submodule [Boolean] Avoid deleting the cloned tap Git repo
-    #   directory when possible
-    def initialize(user, repo, token, keep_submodule: false)
+    def initialize(user, repo, token)
+      @user = user
       @repo = repo
+      @token = token
       @url = "https://#{token}@github.com/#{user}/#{repo}.git"
-      @keep_submodule = keep_submodule
     end
+
+    # Github username
+    #
+    # @return [String]
+    attr_reader :user
 
     # Github repo name, as appears in Github URLs
     #
     # @return [String]
     attr_reader :repo
-
-    # Repo URL, as expected by Git
-    #
-    # @return [String]
-    attr_reader :url
 
     # Github OAuth token
     #
@@ -38,23 +34,10 @@ module HomebrewAutomation
     # @return [String]
     attr_reader :token
 
-    # +pushd+ into a fresh clone, call the block, then clean-up.
+    # Repo URL, as expected by Git
     #
-    # Haskell-y type: +forall a. &Block (String -> a) -> a+
-    #
-    # @yield [String] Basename of the Tap repo directory we've just chdir'd into
-    # @yieldreturn [Eff<a>] something to do
-    # @return [Eff<a>] doing that thing inside the cloned directory
-    def with_git_clone(&block)
-      _git_clone.map! do
-        # TODO: reify to change `#map!` into `#bind!` and to remove `#run!` call
-        Dir.chdir @repo do |basename|
-          block.call(basename).run!
-        end
-      end.ensuring do
-        Eff.exceptWhen @keep_submodule, _remove_git_submodule
-      end
-    end
+    # @return [String]
+    attr_reader :url
 
     # Overwrite the specified Formula file, in-place, on-disk
     #
@@ -86,67 +69,6 @@ module HomebrewAutomation
           File.rename "#{name}.new", name
         end
       end
-    end
-
-    # Set Git user's name and email
-    #
-    # Reads environment variables:
-    # - TRAVIS_GIT_USER_NAME
-    # - TRAVIS_GIT_USER_EMAIL
-    #
-    # If either env var is not set, do nothing.
-    #
-    # @return [Eff]
-    def git_config
-      Eff.new do
-        name = ENV['TRAVIS_GIT_USER_NAME']
-        email = ENV['TRAVIS_GIT_USER_EMAIL']
-        if name && email
-          system 'git', 'config', '--global', 'user.name', name
-          system 'git', 'config', '--global', 'user.email', email
-        end
-      end
-    end
-
-    # Just +git commit -am "$msg"+
-    #
-    # @param msg [String] Git commit message
-    # @return [Eff<TrueClass, err: StandardError]
-    def git_commit_am(msg)
-      Eff.new do
-        complain! unless system "git", "commit", "-am", msg
-      end
-    end
-
-    # Just +git push+
-    #
-    # @return [Eff<TrueClass, err: StandardError>]
-    def git_push
-      Eff.new do
-        complain! unless system "git", "push"
-      end
-    end
-
-    # @return [Eff<NilClass>]
-    def _git_clone
-      Eff.new do
-        complain! unless system "git", "clone", @url
-      end
-    end
-
-    # @return [Eff<NilClass>]
-    def _remove_git_submodule
-      Eff.new do
-        complain! unless system "rm", "-rf", @repo
-      end
-    end
-
-    private
-
-    # Impure
-    def complain!
-      puts "HEY! Something has gone wrong and I need to complain. Stacktrace follows:"
-      puts caller
     end
 
   end
