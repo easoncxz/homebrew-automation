@@ -35,20 +35,26 @@ module HomebrewAutomation
       @bottle_finder = bottle_finder
     end
 
-    # Build the bottle and get a file suitable for Bintray upload
+    # Build the bottle and get a binary tarball suitable for upload to Bintray
     #
     # Unless you've already run +brew install --build-bottle+ on that Formula
     # on your system before, the returned effect would take ages to run (looking
     # at about 30-60 minutes).
     #
-    # @return [Tuple<String, String>] +[filename, contents]+
-    # @raise [BottleError]
-    def build!
-      call_brew!
-      json_str = @bottle_finder.read_json!
-      (minus_minus, filename) = parse_for_tarball_path(json_str)
-      contents = @bottle_finder.read_tarball! minus_minus
-      [filename, contents]
+    # @yieldparam filename [String] A filename to tell Bintray which Homebrew can
+    #   recognise
+    # @yieldparam contents [String] The data of the binary Bottle tarball, as if
+    #   read via {File#read}
+    # @return [NilClass]
+    # @raise [Error]
+    def build!(&block)
+      raise Error, "Bottle#build! expects a block" unless block
+      call_brew! do
+        json_str = @bottle_finder.read_json!
+        (minus_minus, filename) = parse_for_tarball_path(json_str)
+        contents = @bottle_finder.read_tarball! minus_minus
+        block.call(filename, contents)
+      end
     end
 
     def self.read_json!
@@ -63,14 +69,21 @@ module HomebrewAutomation
     private
 
     # tap, install, and bottle
-    def call_brew!
-      @brew.tap!(@tap_name, @tap_url)
-      @brew.install!(
-        %w[--verbose --build-bottle] + if @keep_tmp then %w[--keep-tmp] else [] end,
-        fully_qualified_formula_name)
-      @brew.bottle!(
-        %w[--verbose --json --no-rebuild],
-        fully_qualified_formula_name)
+    def call_brew!(&block)
+      tapped = false
+      begin
+        @brew.tap!(@tap_name, @tap_url)
+        tapped = true
+        @brew.install!(
+          %w[--verbose --build-bottle] + if @keep_tmp then %w[--keep-tmp] else [] end,
+          fully_qualified_formula_name)
+        @brew.bottle!(
+          %w[--verbose --json --no-rebuild],
+          fully_qualified_formula_name)
+        block.call
+      ensure
+        @brew.untap! @tap_name if tapped
+      end
     end
 
     # pure-ish; raises exception

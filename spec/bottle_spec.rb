@@ -26,7 +26,7 @@ describe "HomebrewAutomation::Bottle" do
       bottle_finder: fake_bottle_finder
     )
 
-    [:tap!, :install!, :bottle!].each do |cmd|
+    [:tap!, :install!, :bottle!, :untap!].each do |cmd|
       expect(fake_brew).to receive(cmd).ordered
     end
 
@@ -35,9 +35,10 @@ describe "HomebrewAutomation::Bottle" do
     expect(fake_bottle_finder).to receive(:read_tarball!).
       and_return(bottle_tarball)
 
-    (filename, contents) = bottle.build!
-    expect(filename).to eq(bottle_filename)
-    expect(contents).to eq(bottle_tarball)
+    bottle.build! do |filename, contents|
+      expect(filename).to eq(bottle_filename)
+      expect(contents).to eq(bottle_tarball)
+    end
   end
 
 end

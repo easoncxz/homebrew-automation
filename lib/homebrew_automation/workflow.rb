@@ -45,13 +45,12 @@ module HomebrewAutomation
           formula_name,
           os_name,
           keep_tmp: keep_homebrew_tmp)
-        filename, contents = bot.build!
-
-        # Bintray auto-creates Versions on file-upload.
-        # Re-creating an existing Version results in a 409.
-        #bversion.create!
-        bversion.upload_file!(filename, contents)
-
+        bot.build! do |filename, contents|
+          # Bintray auto-creates Versions on file-upload.
+          # Re-creating an existing Version results in a 409.
+          #bversion.create!
+          bversion.upload_file!(filename, contents)
+        end
         bot
       end
     end
