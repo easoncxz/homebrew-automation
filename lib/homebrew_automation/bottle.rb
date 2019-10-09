@@ -11,23 +11,25 @@ module HomebrewAutomation
     class Error < StandardError
     end
 
+    # @param tap_name [String] For use with +brew tap+
     # @param tap_url [String] Something suitable for +git clone+, e.g. +git@github.com:easoncxz/homebrew-tap.git+ or +/some/path/to/my-git-repo+
     # @param formula_name [String] As known by Homebrew
     # @param os_name [String] As known by Homebrew, e.g. +el_capitan+
-    # @param tap_name [String] For use with +brew tap+
     # @param keep_tmp [Boolean] pass +--keep-tmp+ to +brew+
+    # @param brew [Brew] Homebrew effects
+    # @param bottle_finder [Bottle] Bottle-related filesystem effects
     def initialize(
+        tap_name,
         tap_url,
         formula_name,
         os_name,
-        tap_name: 'easoncxz/tmp-tap',
         keep_tmp: false,
         brew: Brew,
         bottle_finder: Bottle)
+      @tap_name = tap_name
       @tap_url = tap_url
       @formula_name = formula_name
       @os_name = os_name
-      @tap_name = tap_name
       @keep_tmp = keep_tmp
       @brew = brew
       @bottle_finder = bottle_finder

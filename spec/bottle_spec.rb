@@ -22,10 +22,10 @@ describe "HomebrewAutomation::Bottle" do
 
   it 'can figure out the filenames from the one JSON file in the CWD' do
     bottle = HomebrewAutomation::Bottle.new(
-      "somewhere/homebrew-tap",
+      'easoncxz/tap',                 # should match bottle JSON
+      "./somewhere/homebrew-tap",
       "hack-assembler",               # should match bottle JSON
       "high_sierra",                  # should match bottle JSON
-      tap_name: 'easoncxz/tap',       # should match bottle JSON
       brew: fake_brew,
       bottle_finder: fake_bottle_finder
     )
@@ -39,7 +39,7 @@ describe "HomebrewAutomation::Bottle" do
     expect(fake_bottle_finder).to receive(:read_tarball!).
       and_return(bottle_tarball)
 
-    (filename, contents) = bottle.build.run!
+    (filename, contents) = bottle.build!
     expect(filename).to eq(bottle_filename)
     expect(contents).to eq(bottle_tarball)
   end

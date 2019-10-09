@@ -45,15 +45,20 @@ module HomebrewAutomation
           tap.git_commit_am "Throwaway commit; just for building bottles"
         end.map! do
           local_tap_url = file.realpath('.')  # TODO: wrap call to File
-          bottle = bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
-          filename, contents = bottle.build!
+          bot = bottle.new(
+            'homebrew-automation/tmp-tap',
+            local_tap_url,
+            formula_name,
+            os_name,
+            keep_tmp: keep_homebrew_tmp)
+          filename, contents = bot.build!
 
           # Bintray auto-creates Versions on file-upload.
           # Re-creating an existing Version results in a 409.
           #bversion.create!
           bversion.upload_file!(filename, contents)
 
-          bottle
+          bot
         end
       end
       end
