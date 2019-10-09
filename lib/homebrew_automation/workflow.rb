@@ -24,7 +24,6 @@ module HomebrewAutomation
     #
     # @param mac_os [Class] the MacOS class
     # @param bottle [Class] the Bottle class
-    # @param file [Class] the File class
     # @param keep_homebrew_tmp [Boolean] keep the HOMEBREW_TEMP directory
     #
     # @return [Bottle]
@@ -36,19 +35,17 @@ module HomebrewAutomation
         bversion,
         mac_os: MacOS,
         bottle: Bottle,
-        file: File,
         keep_tap_repo: false,
         keep_homebrew_tmp: false)
       mac_os.identify_version.map! do |os_name|
-      git.with_clone!(tap.url, tap.repo, keep_dir: keep_tap_repo) do
+      git.with_clone!(tap.url, tap.repo, keep_dir: keep_tap_repo) do |cloned_dir|
         tap.on_formula! formula_name do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)
         end
         git.commit_am! "Throwaway commit; just for building bottles"
-        local_tap_url = file.realpath('.')  # TODO: wrap call to File
         bot = bottle.new(
           'homebrew-automation/tmp-tap',
-          local_tap_url,
+          cloned_dir,
           formula_name,
           os_name,
           keep_tmp: keep_homebrew_tmp)

@@ -56,7 +56,9 @@ module HomebrewAutomation
         begin
           clone! url, dir: dir
           if block
-            Dir.chdir dir, &block
+            Dir.chdir dir do
+              block.call(File.realpath '.')
+            end
           else
             puts "Strange, you're calling Git#with_clone! without a block."
           end

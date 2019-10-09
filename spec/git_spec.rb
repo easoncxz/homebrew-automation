@@ -11,6 +11,7 @@ describe HomebrewAutomation::Git do
 
   it 'can clone a filepath as URL' do
     expect(Dir.exists? random_tapname).to be false
+    expect(rb_project_root).to start_with '/'
     expect(rb_project_root).to include 'homebrew-automation'
     expect(File.basename rb_project_root).to eq 'homebrew-automation'
     git.with_clone! rb_project_root, random_tapname do
@@ -20,6 +21,14 @@ describe HomebrewAutomation::Git do
       expect(Dir.exists? '../.git').to be true
     end
     expect(Dir.exists? random_tapname).to be false
+  end
+
+  it 'passes the absolute path of the fresh directory to the given block' do
+    git.with_clone! rb_project_root, random_tapname do |dir|
+      expect(dir).to start_with '/'
+      expect(dir).to eq File.realpath('.')
+      expect(File.exists? 'homebrew_automation.gemspec').to be true
+    end
   end
 
   it 'keeps the tap repo dir if keep_dir is passed' do
