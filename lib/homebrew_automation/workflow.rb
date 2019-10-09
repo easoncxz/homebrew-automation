@@ -43,19 +43,17 @@ module HomebrewAutomation
           formula.put_sdist(sdist.url, sdist.sha256)
         end.bind! do
           tap.git_commit_am "Throwaway commit; just for building bottles"
-        end.bind! do
+        end.map! do
           local_tap_url = file.realpath('.')  # TODO: wrap call to File
           bottle = bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
-          bottle.build.bind! do |(filename, contents)|
-            # TODO: reify Bintray::Version effects
+          filename, contents = bottle.build!
 
-            # Bintray auto-creates Versions on file-upload.
-            # Re-creating an existing Version results in a 409.
-            #bversion.create!
-            bversion.upload_file!(filename, contents)
+          # Bintray auto-creates Versions on file-upload.
+          # Re-creating an existing Version results in a 409.
+          #bversion.create!
+          bversion.upload_file!(filename, contents)
 
-            bottle
-          end
+          bottle
         end
       end
       end

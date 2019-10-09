@@ -2,7 +2,6 @@
 require 'json'
 
 require_relative './brew.rb'
-require_relative './effects.rb'
 
 module HomebrewAutomation
 
@@ -11,8 +10,6 @@ module HomebrewAutomation
 
     class Error < StandardError
     end
-
-    Eff = HomebrewAutomation::Effects::Eff
 
     # @param tap_url [String] Something suitable for +git clone+, e.g. +git@github.com:easoncxz/homebrew-tap.git+ or +/some/path/to/my-git-repo+
     # @param formula_name [String] As known by Homebrew
@@ -42,15 +39,14 @@ module HomebrewAutomation
     # on your system before, the returned effect would take ages to run (looking
     # at about 30-60 minutes).
     #
-    # @return [Eff<Tuple<String, String>, error: BottleError>] +[filename, contents]+
-    def build
-      Eff.new do
-        call_brew!
-        json_str = @bottle_finder.read_json!
-        (minus_minus, filename) = parse_for_tarball_path(json_str)
-        contents = @bottle_finder.read_tarball! minus_minus
-        [filename, contents]
-      end
+    # @return [Tuple<String, String>] +[filename, contents]+
+    # @raise [BottleError]
+    def build!
+      call_brew!
+      json_str = @bottle_finder.read_json!
+      (minus_minus, filename) = parse_for_tarball_path(json_str)
+      contents = @bottle_finder.read_tarball! minus_minus
+      [filename, contents]
     end
 
     private
