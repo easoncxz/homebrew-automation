@@ -3,7 +3,6 @@
 
 require_relative 'homebrew_automation/bintray.rb'
 require_relative 'homebrew_automation/bottle.rb'
-require_relative 'homebrew_automation/effects.rb'
 require_relative 'homebrew_automation/formula.rb'
 require_relative 'homebrew_automation/git.rb'
 require_relative 'homebrew_automation/mac_os.rb'
