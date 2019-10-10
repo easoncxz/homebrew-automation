@@ -6,7 +6,7 @@ describe 'MacOS' do
   let (:known_names) { ['yosemite', 'el_capitan', 'sierra', 'high_sierra'] }
 
   it 'returns one of several known strings' do
-    v = HomebrewAutomation::MacOS.identify_version
+    v = HomebrewAutomation::MacOS.identify_version!
     if v
       expect(known_names).to(include(v))
     end

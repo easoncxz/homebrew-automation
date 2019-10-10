@@ -1,8 +1,6 @@
 
 require 'open3'
 require 'webrick'
-require 'pry'
-require 'pry-byebug'
 
 require 'homebrew_automation/bintray/client.rb'
 

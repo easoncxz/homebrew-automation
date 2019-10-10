@@ -1,103 +1,116 @@
 
 require 'json'
 
+require_relative './brew.rb'
+
 module HomebrewAutomation
 
-  # A representation of a binary build of a Homebrew package
+  # Metadata for building a Bottle for a Homebrew package
   class Bottle
 
+    class Error < StandardError
+    end
+
+    # @param tap_name [String] For use with +brew tap+
     # @param tap_url [String] Something suitable for +git clone+, e.g. +git@github.com:easoncxz/homebrew-tap.git+ or +/some/path/to/my-git-repo+
     # @param formula_name [String] As known by Homebrew
     # @param os_name [String] As known by Homebrew, e.g. +el_capitan+
-    # @param filename [String] ???
-    # @param content [String] ???
     # @param keep_tmp [Boolean] pass +--keep-tmp+ to +brew+
+    # @param brew [Brew] Homebrew effects
+    # @param bottle_finder [Bottle] Bottle-related filesystem effects
     def initialize(
+        tap_name,
         tap_url,
         formula_name,
         os_name,
-        filename: nil,
-        content: nil,
-        keep_tmp: false)
+        keep_tmp: false,
+        brew: Brew,
+        bottle_finder: Bottle)
+      @tap_name = tap_name
       @tap_url = tap_url
       @formula_name = formula_name
       @os_name = os_name
-      @filename = filename
-      @minus_minus = nil  # https://github.com/Homebrew/brew/pull/4612
-      @content = content
       @keep_tmp = keep_tmp
+      @brew = brew
+      @bottle_finder = bottle_finder
     end
 
-    # Takes ages to run, just like if done manually
+    # Build the bottle and get a binary tarball suitable for upload to Bintray
     #
-    # @raise [StandardError]
-    # @return [nil]
-    def build
-      complain unless system 'brew', 'tap', tmp_tap_name, @tap_url
-      maybe_keep_tmp = @keep_tmp ? ['--keep-tmp'] : []
-      install_cmd = ['brew', 'install', '--verbose'] + maybe_keep_tmp + ['--build-bottle', fully_qualified_formula_name]
-      complain unless system(*install_cmd)
-      complain unless system 'brew', 'bottle', '--verbose', '--json', '--no-rebuild', fully_qualified_formula_name
-    end
-
-    # Read and analyse metadata JSON file
-    # @return [Array<(String, String)>] {#minus_minus} and {#filename}
-    def locate_tarball
-      json_filename = Dir['*.bottle.json'].first
-      unless json_filename
-        build
-        return locate_tarball
+    # Unless you've already run +brew install --build-bottle+ on that Formula
+    # on your system before, the returned effect would take ages to run (looking
+    # at about 30-60 minutes).
+    #
+    # @yieldparam filename [String] A filename to tell Bintray which Homebrew can
+    #   recognise
+    # @yieldparam contents [String] The data of the binary Bottle tarball, as if
+    #   read via {File#read}
+    # @return [NilClass]
+    # @raise [Error]
+    def build!(&block)
+      raise Error, "Bottle#build! expects a block" unless block
+      call_brew! do
+        json_str = @bottle_finder.read_json!
+        (minus_minus, filename) = parse_for_tarball_path(json_str)
+        contents = @bottle_finder.read_tarball! minus_minus
+        block.call(filename, contents)
       end
-      json = JSON.parse(File.read(json_filename))
-      focus = json || complain
-      focus = focus[json.keys.first] || complain
-      focus = focus['bottle'] || complain
-      focus = focus['tags'] || complain
-      focus = focus[@os_name] || complain
-      @minus_minus, @filename = focus['local_filename'], focus['filename']
     end
 
-    # The +brew bottle+ original output filename
-    #
-    # See https://github.com/Homebrew/brew/pull/4612 for details.
-    #
-    # @return [String]
-    def minus_minus
-      @minus_minus || locate_tarball.first
+    def self.read_json!
+      json_filename = Dir['*.bottle.json'].first
+      File.read(json_filename)
     end
 
-    # Filename of a Bottle tarball suitable for writing into a Formula file
-    #
-    # @return [String]
-    def filename
-      @filename || locate_tarball.last
-    end
-
-    # @return [String] {#content}
-    def load_tarball_from_disk
-      File.rename minus_minus, filename
-      @content = File.read filename
-    end
-
-    # @return [String] bytes of the tarball of this Bottle
-    def content
-      @content || load_tarball_from_disk
+    def self.read_tarball!(minus_minus)
+      File.read(minus_minus)
     end
 
     private
 
-    # A name for the temporary tap; doesn't really matter what this is.
-    def tmp_tap_name
-      'easoncxz/tmp-tap'
+    # tap, install, and bottle
+    def call_brew!(&block)
+      tapped = false
+      begin
+        @brew.tap!(@tap_name, @tap_url)
+        tapped = true
+        @brew.install!(
+          %w[--verbose --build-bottle] + if @keep_tmp then %w[--keep-tmp] else [] end,
+          fully_qualified_formula_name)
+        @brew.bottle!(
+          %w[--verbose --json --no-rebuild],
+          fully_qualified_formula_name)
+        block.call
+      ensure
+        @brew.untap! @tap_name if tapped
+      end
+    end
+
+    # pure-ish; raises exception
+    #
+    # @return [Tuple<String, String>] +[minus_minus, filename]+
+    def parse_for_tarball_path(json_str)
+      begin
+        focus = JSON.parse(json_str)
+        [fully_qualified_formula_name, 'bottle', 'tags', @os_name].each do |key|
+          focus = focus[key]
+          if focus.nil?
+            raise BottleError.new "unexpected JSON structure, couldn't find key: #{key}"
+          end
+        end
+        # https://github.com/Homebrew/brew/pull/4612
+        minus_minus, filename = focus['local_filename'], focus['filename']
+        if minus_minus.nil? || filename.nil?
+          raise BottleError.new "unexpected JSON structure, couldn't find both `local_filename` and `filename` keys: #{minus_minus.inspect}, #{filename.inspect}"
+        end
+        [minus_minus, filename]
+      rescue JSON::ParserError => e
+        raise BottleError.new "error parsing JSON: #{e}"
+      end
     end
 
     def fully_qualified_formula_name
-      tmp_tap_name + '/' + @formula_name
-    end
-
-    def complain
-      puts "HEY! Something has gone wrong and I need to complain. Stacktrace follows:"
-      puts caller
+      @tap_name + '/' + @formula_name
     end
 
   end

@@ -1,7 +1,6 @@
 
 require_relative './mac_os.rb'
-require_relative './bintray.rb'
-require_relative './source_dist.rb'
+require_relative './bottle.rb'
 
 module HomebrewAutomation
 
@@ -18,25 +17,45 @@ module HomebrewAutomation
     # @param tap [Tap]
     # @param formula_name [String] the name of the formula in the Tap
     # @param bversion [Bintray::Version]
+    #
+    # @param mac_os [Class] the MacOS class
+    # @param bottle [Class] the Bottle class
+    # @param keep_homebrew_tmp [Boolean] keep the HOMEBREW_TEMP directory
+    #
     # @return [Bottle]
-    def build_and_upload_bottle(sdist, tap, formula_name, bversion, keep_homebrew_tmp: false)
-      os_name = MacOS.identify_version
-      tap.with_git_clone do
-        tap.on_formula(formula_name) do |formula|
+    def build_and_upload_bottle!(
+        sdist,
+        tap,
+        git,
+        formula_name,
+        bversion,
+        mac_os: MacOS,
+        bottle: Bottle,
+        keep_tap_repo: false,
+        keep_homebrew_tmp: false)
+      os_name = mac_os.identify_version!
+      git.with_clone!(tap.url, tap.repo, keep_dir: keep_tap_repo) do |cloned_dir|
+        tap.on_formula! formula_name do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)
         end
-        tap.git_commit_am "Throwaway commit; just for building bottles"
-
-        local_tap_url = File.realpath('.')
-        bottle = Bottle.new(local_tap_url, formula_name, os_name, keep_tmp: keep_homebrew_tmp)
-        bottle.build
-
-        # Bintray auto-creates Versions on file-upload.
-        # Re-creating an existing Version results in a 409.
-        #bversion.create!
-        bversion.upload_file!(bottle.filename, bottle.content)
-
-        bottle
+        git.commit_am! "Throwaway commit; just for building bottles"
+        bot = bottle.new(
+          'homebrew-automation/tmp-tap',
+          cloned_dir,
+          formula_name,
+          os_name,
+          keep_tmp: keep_homebrew_tmp)
+        bot.build! do |filename, contents|
+          # Bintray auto-creates Versions on file-upload.
+          # Re-creating an existing Version results in a 409.
+          #bversion.create!
+          begin
+            bversion.upload_file!(filename, contents)
+          rescue Bintray::Version::FileAlreadyExists
+            puts "A file with the same name as the one you're uploading already exits on Bintray"
+          end
+        end
+        bot
       end
     end
 
@@ -51,10 +70,10 @@ module HomebrewAutomation
     # @param tap [Tap]
     # @param formula_name [String] the name of the formula in the Tap
     # @param bversion [Bintray::Version]
-    # @return [Formula]
-    def gather_and_publish_bottles(sdist, tap, formula_name, bversion)
-      tap.with_git_clone do
-        tap.on_formula(formula_name) do |formula|
+    # @return [NilClass]
+    def gather_and_publish_bottles!(sdist, tap, formula_name, bversion)
+      git.with_clone!(tap.url, tap.repo) do
+        tap.on_formula! formula_name do |formula|
           bottles = bversion.gather_bottles
           bottles.reduce(
             formula.
@@ -64,10 +83,11 @@ module HomebrewAutomation
             f.put_bottle(os, checksum)
           end
         end
-        tap.git_config
-        tap.git_commit_am "Add bottles for #{formula_name}@#{bversion.version_name}"
-        tap.git_push
+        git.config!
+        git.commit_am! "Add bottles for #{formula_name}@#{bversion.version_name}"
+        git.push!
       end
+      nil
     end
 
   end

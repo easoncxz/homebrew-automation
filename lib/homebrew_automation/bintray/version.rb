@@ -11,6 +11,10 @@ module HomebrewAutomation::Bintray
   # As per Bintray, a +Version+ is part of a +Package+ is part of a +Repository+.
   class Version
 
+    # The file to upload already exists on Bintray
+    class FileAlreadyExists < StandardError
+    end
+
     # @param client [Client] Connection to Bintray servers
     # @param repo_name [String]
     # @param package_name [String]
@@ -39,12 +43,21 @@ module HomebrewAutomation::Bintray
     # @param filename [String]
     # @param content [String] the bytes in the file
     def upload_file!(filename, content)
-      @client.upload_file(
-        @repo_name,
-        @package_name,
-        @version_name,
-        filename,
-        content)
+      begin
+        @client.upload_file(
+          @repo_name,
+          @package_name,
+          @version_name,
+          filename,
+          content)
+      rescue RestClient::ExceptionWithResponse => e
+        case e.response.code
+        when 409
+          raise FileAlreadyExists
+        else
+          raise e
+        end
+      end
     end
 
     # Download metadata about files that exist on Bintray for this +Version+
