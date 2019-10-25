@@ -5,7 +5,7 @@ require 'homebrew_automation/git.rb'
 
 describe HomebrewAutomation::Git do
 
-  let(:git) { HomebrewAutomation::Git }
+  let(:git) { HomebrewAutomation::Git.new }
   let(:random_tapname) { "sample-repo-#{rand 1000..9999}" }
   let(:rb_project_root) { File.realpath('.') }
 
