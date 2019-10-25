@@ -7,6 +7,9 @@ module HomebrewAutomation
     class Error < StandardError
     end
 
+    class OlderVersionAlreadyInstalled < StandardError
+    end
+
     # +brew tap "$name" "$url"+
     #
     # @param name [String]
@@ -28,6 +31,8 @@ module HomebrewAutomation
     # @param fully_qualified_formula_name [String]
     def self.install!(opts, fully_qualified_formula_name)
       checked('brew', 'install', *opts, fully_qualified_formula_name)
+    rescue Error
+      raise OlderVersionAlreadyInstalled
     end
 
     # +brew bottle [opts] "$fully_qualified_formula_name"+
@@ -41,7 +46,7 @@ module HomebrewAutomation
     private_class_method def self.checked(*args)
       result = system(*args)
       unless result
-        raise BrewError.new("Command failed: #{args}")
+        raise Error.new(args.join(' '))
       end
       result
     end
