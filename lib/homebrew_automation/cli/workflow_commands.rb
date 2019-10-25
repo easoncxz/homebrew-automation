@@ -35,6 +35,7 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
       git,
       formula_name,
       bintray_version,
+      logger,
       keep_tap_repo: options[:keep_tap_repo],
       keep_homebrew_tmp: options[:keep_brew_tmp])
   end
@@ -96,6 +97,10 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
 
   def workflow
     HomebrewAutomation::Workflow.new
+  end
+
+  def logger
+    HomebrewAutomation::Logger.new
   end
 
 end
