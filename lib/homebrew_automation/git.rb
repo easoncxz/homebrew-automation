@@ -87,7 +87,7 @@ module HomebrewAutomation
       begin
         result = system(*args)
         unless result
-          raise Error, "Something went wrong with this git command: #{args.join(' ')}"
+          raise Error, args.join(' ')
         end
         result
       end

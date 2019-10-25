@@ -70,9 +70,29 @@ module HomebrewAutomation
       end
       logger.info!("All done!")
     rescue HomebrewAutomation::Bottle::Error => e
-      logger.error!(e.message + "\n" + e.backtrace.join("\n"))
+      logger.error!([
+        "Something went wrong in a Bottle: " + e.message,
+        "Original JSON:",
+        e.original,
+        "Backtrace:",
+        e.backtrace.join("\n")
+      ].join("\n"))
+    rescue HomebrewAutomation::Bottle::OlderVersionAlreadyInstalled => e
+      logger.error!([
+        "An older version of the Formula is already installed on your system. " \
+        "Please either manually uninstall or upgrade it, then try again.",
+        e.to_s,
+        "Caused by: #{e.cause}",
+        (e.cause ? e.cause.backtrace.join("\n") : '')
+      ].join("\n"))
+    rescue HomebrewAutomation::Brew::Error => e
+      logger.error!(
+        "Something went wrong in this Homebrew command: " +
+        e.message + "\n" + e.backtrace.join("\n"))
     rescue HomebrewAutomation::Git::Error => e
-      logger.error!(e.message + "\n" + e.backtrace.join("\n"))
+      logger.error!(
+        "Something went wrong in this Git command: " +
+        e.message + "\n" + e.backtrace.join("\n"))
     end
 
     # Gather and publish bottles.

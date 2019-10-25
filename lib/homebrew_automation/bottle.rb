@@ -8,6 +8,17 @@ module HomebrewAutomation
   # Metadata for building a Bottle for a Homebrew package
   class Bottle
 
+    class Error < StandardError
+
+      attr_reader :original
+
+      def initialize(msg, original:)
+        @original = original
+        super(msg)
+      end
+
+    end
+
     # @param tap_name [String] For use with +brew tap+
     # @param tap_url [String] Something suitable for +git clone+, e.g. +git@github.com:easoncxz/homebrew-tap.git+ or +/some/path/to/my-git-repo+
     # @param formula_name [String] As known by Homebrew
@@ -87,21 +98,28 @@ module HomebrewAutomation
     # @return [Tuple<String, String>] +[minus_minus, filename]+
     def parse_for_tarball_path(json_str)
       begin
-        focus = JSON.parse(json_str)
+        json = JSON.parse(json_str)
+        focus = json
         [fully_qualified_formula_name, 'bottle', 'tags', @os_name].each do |key|
           focus = focus[key]
           if focus.nil?
-            raise BottleError.new "unexpected JSON structure, couldn't find key: #{key}"
+            raise Error.new(
+              "unexpected JSON structure, couldn't find key: #{key}",
+              original: json)
           end
         end
         # https://github.com/Homebrew/brew/pull/4612
         minus_minus, filename = focus['local_filename'], focus['filename']
         if minus_minus.nil? || filename.nil?
-          raise BottleError.new "unexpected JSON structure, couldn't find both `local_filename` and `filename` keys: #{minus_minus.inspect}, #{filename.inspect}"
+          raise Error.new(
+            "unexpected JSON structure, couldn't find both `local_filename` and `filename` keys: #{minus_minus.inspect}, #{filename.inspect}",
+            original: json)
         end
         [minus_minus, filename]
       rescue JSON::ParserError => e
-        raise BottleError.new "error parsing JSON: #{e}"
+        raise Error.new(
+          "error parsing JSON: #{e}",
+          original: json_str)
       end
     end
 
