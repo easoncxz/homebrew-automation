@@ -8,9 +8,6 @@ module HomebrewAutomation
   # Metadata for building a Bottle for a Homebrew package
   class Bottle
 
-    class Error < StandardError
-    end
-
     # @param tap_name [String] For use with +brew tap+
     # @param tap_url [String] Something suitable for +git clone+, e.g. +git@github.com:easoncxz/homebrew-tap.git+ or +/some/path/to/my-git-repo+
     # @param formula_name [String] As known by Homebrew
@@ -46,9 +43,8 @@ module HomebrewAutomation
     # @yieldparam contents [String] The data of the binary Bottle tarball, as if
     #   read via {File#read}
     # @return [NilClass]
-    # @raise [Error]
     def build!(&block)
-      raise Error, "Bottle#build! expects a block" unless block
+      raise StandardError, "Bottle#build! expects a block" unless block
       call_brew! do
         json_str = @bottle_finder.read_json!
         (minus_minus, filename) = parse_for_tarball_path(json_str)

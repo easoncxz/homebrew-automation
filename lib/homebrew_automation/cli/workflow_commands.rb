@@ -72,7 +72,7 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
   end
 
   def git
-    HomebrewAutomation::Git
+    HomebrewAutomation::Git.new
   end
 
   # DOC: default values here

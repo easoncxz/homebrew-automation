@@ -41,7 +41,7 @@ module HomebrewAutomation
     private_class_method def self.checked(*args)
       result = system(*args)
       unless result
-        raise BrewError.new("Command failed: #{args}")
+        raise Error.new("Something went wrong in this Homebrew command: #{args.join(' ')}")
       end
       result
     end

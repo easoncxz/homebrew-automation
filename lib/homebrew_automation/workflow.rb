@@ -69,6 +69,10 @@ module HomebrewAutomation
         bot
       end
       logger.info!("All done!")
+    rescue HomebrewAutomation::Bottle::Error => e
+      logger.error!(e.message + "\n" + e.backtrace.join("\n"))
+    rescue HomebrewAutomation::Git::Error => e
+      logger.error!(e.message + "\n" + e.backtrace.join("\n"))
     end
 
     # Gather and publish bottles.
