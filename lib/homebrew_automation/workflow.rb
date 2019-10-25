@@ -77,7 +77,7 @@ module HomebrewAutomation
         "Backtrace:",
         e.backtrace.join("\n")
       ].join("\n"))
-    rescue HomebrewAutomation::Bottle::OlderVersionAlreadyInstalled => e
+    rescue HomebrewAutomation::Brew::OlderVersionAlreadyInstalled => e
       logger.error!([
         "An older version of the Formula is already installed on your system. " \
         "Please either manually uninstall or upgrade it, then try again.",
