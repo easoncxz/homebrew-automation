@@ -44,7 +44,7 @@ GEM
     pry-byebug (3.6.0)
       byebug (~> 10.0)
       pry (~> 0.10)
-    rake (12.3.1)
+    rake (13.0.1)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -85,7 +85,7 @@ PLATFORMS
 DEPENDENCIES
   homebrew_automation!
   pry-byebug (~> 3.6)
-  rake (~> 12.3)
+  rake (~> 13.0)
   ripper-tags
   rspec (~> 3.7)
   yard

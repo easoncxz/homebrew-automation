@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.1.8'
   s.add_development_dependency 'rspec', '~> 3.7'
-  s.add_development_dependency 'rake', '~> 12.3'
+  s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'pry-byebug', '~> 3.6'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'ripper-tags'
