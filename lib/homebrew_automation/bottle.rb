@@ -81,6 +81,10 @@ module HomebrewAutomation
       begin
         @brew.tap!(@tap_name, @tap_url)
         tapped = true
+        if @brew.list!([], fully_qualified_formula_name)
+          # passing `--force` to uninstall all versions
+          @brew.uninstall!(['--force'], fully_qualified_formula_name)
+        end
         @brew.install!(
           %w[--verbose --build-bottle] + if @keep_tmp then %w[--keep-tmp] else [] end,
           fully_qualified_formula_name)

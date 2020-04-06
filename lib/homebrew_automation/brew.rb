@@ -35,6 +35,30 @@ module HomebrewAutomation
       raise OlderVersionAlreadyInstalled
     end
 
+    class UninstallFailed < StandardError
+    end
+
+    # +brew uninstall [opts] "$fully_qualified_formula_name"+
+    #
+    # @param opts [Array<String>]
+    # @param fully_qualified_formula_name [String]
+    def self.uninstall!(opts, fully_qualified_formula_name)
+      checked('brew', 'uninstall', *opts, fully_qualified_formula_name)
+    rescue Error
+      raise UninstallFailed
+    end
+
+    # +brew list [opts] "$fully_qualified_formula_name"+
+    #
+    # Good for checking whether a Formula is installed.
+    #
+    # @param opts [Array<String>]
+    # @param fully_qualified_formula_name [String]
+    # @return true iff the Formula is installed
+    def self.list!(opts, fully_qualified_formula_name)
+      system('brew', 'list', *opts, fully_qualified_formula_name)
+    end
+
     # +brew bottle [opts] "$fully_qualified_formula_name"+
     #
     # @param opts [Array<String>]
