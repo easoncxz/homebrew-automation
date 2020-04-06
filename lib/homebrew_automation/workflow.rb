@@ -85,7 +85,7 @@ module HomebrewAutomation
         "Caused by: #{e.cause}",
         (e.cause ? e.cause.backtrace.join("\n") : '')
       ].join("\n"))
-    rescue HomebrewAutomation::Brew::UninstallFailed => >e
+    rescue HomebrewAutomation::Brew::UninstallFailed => e
       logger.error!("brew uninstall failed:\n" + e.backtrace.join("\n"))
     rescue HomebrewAutomation::Brew::Error => e
       logger.error!(
