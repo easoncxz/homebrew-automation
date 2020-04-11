@@ -135,6 +135,7 @@ module HomebrewAutomation
         tap.on_formula! formula_name do |formula|
           logger.info!("Let's see if any files on your Bintray look like Bottles.")
           bottles = bversion.gather_bottles
+          logger.info!("Found bottles: #{bottles}")
           bottles.reduce(
             formula.
             put_sdist(sdist.url, sdist.sha256).
