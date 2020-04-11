@@ -52,7 +52,8 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
       sdist,
       tap,
       formula_name,
-      bintray_version)
+      bintray_version,
+      logger)
   end
 
   private
