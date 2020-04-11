@@ -6,6 +6,9 @@ module HomebrewAutomation
   # A representation of a source distribution tarball file
   class SourceDist
 
+    class Error < StandardError
+    end
+
     # Assign args to attributes {#user}, {#repo}, {#tag}
     def initialize user, repo, tag, http: RestClient
       @user = user
@@ -38,6 +41,9 @@ module HomebrewAutomation
       @sha256 ||= Digest::SHA256.hexdigest contents
     end
 
+    class SdistDoesNotExist < StandardError
+    end
+
     # Download and return the file contents.
     #
     # Lazy and memoized.
@@ -51,9 +57,10 @@ module HomebrewAutomation
           when 200
             resp.body.to_s
           else
-            puts resp
-            raise StandardError.new resp.code
+            raise Error.new "Other error: HTTP #{resp.code}"
           end
+        rescue RestClient::NotFound
+          raise SdistDoesNotExist.new
         end
     end
 

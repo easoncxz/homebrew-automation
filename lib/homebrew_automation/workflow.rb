@@ -1,6 +1,9 @@
 
 require_relative './mac_os.rb'
 require_relative './bottle.rb'
+require_relative './brew.rb'
+require_relative './git.rb'
+require_relative './source_dist.rb'
 
 module HomebrewAutomation
 
@@ -78,6 +81,7 @@ module HomebrewAutomation
         "Backtrace:",
         e.backtrace.join("\n")
       ].join("\n"))
+      raise
     rescue HomebrewAutomation::Brew::OlderVersionAlreadyInstalled => e
       logger.error!([
         "An older version of the Formula is already installed on your system. " \
@@ -86,16 +90,23 @@ module HomebrewAutomation
         "Caused by: #{e.cause}",
         (e.cause ? e.cause.backtrace.join("\n") : '')
       ].join("\n"))
+      raise
     rescue HomebrewAutomation::Brew::UninstallFailed => e
       logger.error!("brew uninstall failed:\n" + e.backtrace.join("\n"))
+      raise
     rescue HomebrewAutomation::Brew::Error => e
       logger.error!(
         "Something went wrong in this Homebrew command: " +
         e.message + "\n" + e.backtrace.join("\n"))
+      raise
     rescue HomebrewAutomation::Git::Error => e
       logger.error!(
         "Something went wrong in this Git command: " +
         e.message + "\n" + e.backtrace.join("\n"))
+      raise
+    rescue HomebrewAutomation::SourceDist::SdistDoesNotExist => e
+      logger.error!("The tar file from Github you named doesn't exist. Is it because you haven't pushed that tag to Github yet?")
+      raise
     end
 
     # Gather and publish bottles.
