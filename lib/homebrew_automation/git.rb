@@ -49,7 +49,7 @@ module HomebrewAutomation
     # @param keep_dir [Boolean]
     # @yieldparam dir [String] name of freshly cloned dir
     # @yieldreturn [a] anything
-    # @return [a]
+    # @return [NilClass]
     def with_clone!(url, dir, keep_dir: false, &block)
       begin
         clone! url, dir: dir

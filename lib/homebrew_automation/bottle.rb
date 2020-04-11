@@ -81,7 +81,9 @@ module HomebrewAutomation
       begin
         @brew.tap!(@tap_name, @tap_url)
         tapped = true
+        # TODO: @brew.list! may print a worrying "Error" message if Formula wasn't installed:
         if @brew.list!([], fully_qualified_formula_name)
+          # TODO: This doesn't seem to work. Carefully test.
           # passing `--force` to uninstall all versions
           @brew.uninstall!(['--force'], fully_qualified_formula_name)
         end

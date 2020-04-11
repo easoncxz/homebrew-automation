@@ -40,6 +40,7 @@ module HomebrewAutomation
         "bottles to Bintray.")
       os_name = mac_os.identify_version!
       logger.info!("First let's clone your Tap repo to see the Formula.")
+      # TODO: What if repo already exists?
       git.with_clone!(tap.url, tap.repo, keep_dir: keep_tap_repo) do |cloned_dir|
         tap.on_formula! formula_name do |formula|
           formula.put_sdist(sdist.url, sdist.sha256)
