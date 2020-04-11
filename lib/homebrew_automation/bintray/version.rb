@@ -16,11 +16,13 @@ module HomebrewAutomation::Bintray
     end
 
     # @param client [Client] Connection to Bintray servers
+    # @param logger [HomebrewAutomation::Logger]
     # @param repo_name [String]
     # @param package_name [String]
     # @param version_name [String]
-    def initialize(client, repo_name, package_name, version_name)
+    def initialize(client, logger, repo_name, package_name, version_name)
       @client = client
+      @logger = logger
       @repo_name = repo_name
       @package_name = package_name
       @version_name = version_name
@@ -67,6 +69,7 @@ module HomebrewAutomation::Bintray
       resp = @client.get_all_files_in_version(@repo_name, @package_name, @version_name)
       _assert_match((200..207), resp.code)
       json = JSON.parse(resp.body)
+      @logger.info!("All files in Bintray Version: #{json}")
       _assert_match(Array, json)
       pairs = json.map do |f|
         os = _parse_for_os(f['name'])

@@ -22,9 +22,11 @@ describe "HomebrewAutomation::Bintray::Version" do
   let (:repo) { 'my-repo' }
   let (:package) { 'my-package' }
   let (:version) { 'version-1' }
+  let (:logger) { spy('logger') }
   let (:bintray_version) do
     HomebrewAutomation::Bintray::Version.new(
       d_bintray_client,
+      logger,
       repo,
       package,
       version)

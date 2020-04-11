@@ -92,6 +92,7 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
   def bintray_version
     HomebrewAutomation::Bintray::Version.new(
       bintray_client,
+      logger,
       options[:bintray_repo] || "homebrew-bottles",
       options[:bintray_package] || sdist.repo,
       options[:bintray_version] || sdist.tag.sub(/^v/, ''))
