@@ -33,6 +33,7 @@ end
 
 task :tag do
   system 'git', 'tag', "v#{HomebrewAutomation::VERSION}"
+  system 'git', '--no-pager', 'show', '--shortstat'
 end
 
 task :docs do

@@ -88,7 +88,7 @@ module HomebrewAutomation
           @brew.uninstall!(['--force'], fully_qualified_formula_name)
         end
         @brew.install!(
-          %w[--verbose --build-bottle] + if @keep_tmp then %w[--keep-tmp] else [] end,
+          %w[--verbose --build-bottle --force] + if @keep_tmp then %w[--keep-tmp] else [] end,
           fully_qualified_formula_name)
         @brew.bottle!(
           %w[--verbose --json --no-rebuild],

@@ -77,35 +77,25 @@ module HomebrewAutomation
       logger.error!([
         "Something went wrong in a Bottle: " + e.message,
         "Original JSON:",
-        e.original,
-        "Backtrace:",
-        e.backtrace.join("\n")
-      ].join("\n"))
-      raise
-    rescue HomebrewAutomation::Brew::OlderVersionAlreadyInstalled => e
-      logger.error!([
-        "An older version of the Formula is already installed on your system. " \
-        "Please either manually uninstall or upgrade it, then try again.",
-        e.to_s,
-        "Caused by: #{e.cause}",
-        (e.cause ? e.cause.backtrace.join("\n") : '')
+        e.original
       ].join("\n"))
       raise
     rescue HomebrewAutomation::Brew::UninstallFailed => e
-      logger.error!("brew uninstall failed:\n" + e.backtrace.join("\n"))
+      logger.error!("brew uninstall failed: #{e}")
+      raise
+    rescue HomebrewAutomation::Brew::InstallFailed => e
+      logger.error!("brew install failed: #{e}")
       raise
     rescue HomebrewAutomation::Brew::Error => e
-      logger.error!(
-        "Something went wrong in this Homebrew command: " +
-        e.message + "\n" + e.backtrace.join("\n"))
+      logger.error!("Something went wrong in this Homebrew command: #{e}")
       raise
     rescue HomebrewAutomation::Git::Error => e
-      logger.error!(
-        "Something went wrong in this Git command: " +
-        e.message + "\n" + e.backtrace.join("\n"))
+      logger.error!("Something went wrong in this Git command: #{e}")
       raise
     rescue HomebrewAutomation::SourceDist::SdistDoesNotExist => e
-      logger.error!("The tar file from Github you named doesn't exist. Is it because you haven't pushed that tag to Github yet?")
+      logger.error!(
+        "The tar file from Github you named doesn't exist. " +
+        "Is it because you haven't pushed that tag to Github yet?")
       raise
     end
 

@@ -7,9 +7,6 @@ module HomebrewAutomation
     class Error < StandardError
     end
 
-    class OlderVersionAlreadyInstalled < StandardError
-    end
-
     # +brew tap "$name" "$url"+
     #
     # @param name [String]
@@ -25,6 +22,9 @@ module HomebrewAutomation
       checked('brew', 'untap', name)
     end
 
+    class InstallFailed < StandardError
+    end
+
     # +brew install [opts] "$fully_qualified_formula_name"+
     #
     # @param opts [Array<String>]
@@ -32,7 +32,7 @@ module HomebrewAutomation
     def self.install!(opts, fully_qualified_formula_name)
       checked('brew', 'install', *opts, fully_qualified_formula_name)
     rescue Error
-      raise OlderVersionAlreadyInstalled
+      raise InstallFailed
     end
 
     class UninstallFailed < StandardError
