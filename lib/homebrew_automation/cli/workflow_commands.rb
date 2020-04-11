@@ -53,6 +53,7 @@ class HomebrewAutomation::CLI::WorkflowCommands < Thor
       tap,
       formula_name,
       bintray_version,
+      git,
       logger)
   end
 

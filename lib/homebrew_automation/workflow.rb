@@ -109,9 +109,10 @@ module HomebrewAutomation
     # @param tap [Tap]
     # @param formula_name [String] the name of the formula in the Tap
     # @param bversion [Bintray::Version]
+    # @param git [HomebrewAutomation::Git]
     # @param logger [HomebrewAutomation::Logger]
     # @return [NilClass]
-    def gather_and_publish_bottles!(sdist, tap, formula_name, bversion, logger)
+    def gather_and_publish_bottles!(sdist, tap, formula_name, bversion, git, logger)
       logger.info!(
         "Hello, this is HomebrewAutomation! I will browse through your Bintray to " \
         "see if there may be Bottles built earlier for your Formula, and update your " \
