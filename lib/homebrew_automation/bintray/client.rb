@@ -86,7 +86,7 @@ module HomebrewAutomation::Bintray
       safe_pkg = URI.escape(package_name)
       safe_ver = URI.escape(version_name)
       @http.get(
-        rel("/packages/#{safe_username}/#{safe_repo}/#{safe_pkg}/versions/#{safe_ver}/files"),
+        rel("/packages/#{safe_username}/#{safe_repo}/#{safe_pkg}/versions/#{safe_ver}/files?include_unpublished=1"),
         auth_headers)
     end
 

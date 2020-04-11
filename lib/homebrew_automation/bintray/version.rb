@@ -75,7 +75,7 @@ module HomebrewAutomation::Bintray
         os = _parse_for_os(f['name'])
         checksum = f['sha256']
         [os, checksum]
-      end
+      end.select { |o, _| not o.empty? }
       Hash[pairs]
     end
 
