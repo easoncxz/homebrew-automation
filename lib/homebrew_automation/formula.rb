@@ -76,10 +76,11 @@ module HomebrewAutomation
     # @param sha256 [String] Checksum of the binary "Bottle" tarball
     # @return [Formula] a new instance of Formula with the changes applied
     def put_bottle os, sha256
-      Formula.new update(
+      f = Formula.new(update(
         @ast,
         bot_begin_path,
-        put_bottle_version(os, sha256))
+        put_bottle_version(os, sha256)))
+      f
     end
 
     # Remove sha256 references to all bottles
@@ -132,7 +133,8 @@ module HomebrewAutomation
             by_both(
               by_type('send'),
               by_msg('bottle')))),
-        by_type('begin')]
+       by_type('begin')
+      ]
     end
 
     # Tricky: this is an insert-or-update
@@ -147,7 +149,7 @@ module HomebrewAutomation
               by_msg('sha256'),
               by_os(os))
           # Then add the one we want
-          ).push(new_sha256(sha256, os)))
+          ) + [new_sha256(sha256, os)])
       }
     end
 
@@ -191,11 +193,12 @@ module HomebrewAutomation
         fn.(node)
       else
         choose, *rest = path
-        node.updated(
+        n = node.updated(
           nil,    # Don't change node type
           node.children.map do |c|
             choose.(c) ? update(c, rest, fn) : c
           end)
+        n
       end
     end
 

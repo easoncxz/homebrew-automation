@@ -175,4 +175,52 @@ end
     expect(after).not_to eq before_2
   end
 
+  def s(type, *children)
+    Parser::AST::Node.new(type, children)
+  end
+
+  xdescribe "when there is only one expression in the bottle clause" do
+
+    INIT_FORMULA_SIMPLER = File.read "spec/data/sample-formula-without-cellar-nor-rebuild.rb"
+
+    it "can wipe out all bottles just the same" do
+      formula_before = parsing_api INIT_FORMULA_SIMPLER
+      formula_after = formula_before.rm_all_bottles
+      expect(formula_after).to eq formula_before
+    end
+
+    it "can put new bottles in" do
+      formula_before = parsing_api INIT_FORMULA_SIMPLER
+      formula_after = formula_before.put_bottle("yosemite", "1234")
+      str_expected = <<-'HEREDOC'.chomp
+class WeiboExport < Formula
+  desc("Semi-automatic CLI tool to download mblogs from weibo.com")
+  homepage("https://github.com/easoncxz/weibo-export")
+  url("https://github.com/easoncxz/weibo-export/archive/v0.1.0.2.tar.gz")
+  sha256("4b0938c442bfbde3d34037ace1024bf235f4bdf30f64319c1413d0b4cf681b07")
+  depends_on("haskell-stack" => :build)
+  bottle do
+    root_url("https://dl.bintray.com/easoncxz/homebrew-bottles")
+    sha256("1234" => :yosemite)
+  end
+  def install
+    system("stack", "upgrade", "--force-download")
+    system("stack", "setup", "--verbose")
+    system("stack", "build")
+    prefix = `#{"stack path --dist-dir"}`.chomp
+    bin.install("#{prefix}#{"/build/weibo-export/weibo-export"}")
+  end
+  test do
+    system("weibo-export", "--help")
+  end
+end
+      HEREDOC
+      str_after = formatting_api(formula_after)
+      expect(str_after).to be_a String
+      expect(str_expected).to be_a String
+      expect(str_after).to eq str_expected
+    end
+
+  end
+
 end

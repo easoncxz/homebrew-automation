@@ -126,13 +126,14 @@ module HomebrewAutomation
           logger.info!("Let's see if any files on your Bintray look like Bottles.")
           bottles = bversion.gather_bottles
           logger.info!("Found bottles: #{bottles}")
-          bottles.reduce(
+          new_formula = bottles.reduce(
             formula.
             put_sdist(sdist.url, sdist.sha256).
             rm_all_bottles
           ) do |f, (os, checksum)|
             f.put_bottle(os, checksum)
           end
+          new_formula
         end
         git.config!
         git.commit_am! "Add bottles for #{formula_name}@#{bversion.version_name}"
